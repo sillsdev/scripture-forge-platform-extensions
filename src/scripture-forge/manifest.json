@@ -1,0 +1,17 @@
+{
+  "name": "scripture-forge",
+  "version": "0.0.1",
+  "publisher": "scriptureForge",
+  "displayData": "assets/displayData.json",
+  "author": "SIL",
+  "license": "MIT",
+  "main": "src/main.ts",
+  "extensionDependencies": {},
+  "elevatedPrivileges": [],
+  "types": "src/types/scripture-forge.d.ts",
+  "menus": "contributions/menus.json",
+  "settings": "contributions/settings.json",
+  "projectSettings": "contributions/projectSettings.json",
+  "localizedStrings": "contributions/localizedStrings.json",
+  "activationEvents": []
+}

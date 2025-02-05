@@ -1,0 +1,12 @@
+{
+  "icon": "",
+  "moreInfoUrl": "https://github.com/sillsdev/scripture-forge-platform-extensions/tree/main/src/scripture-forge",
+  "supportUrl": "https://github.com/sillsdev/scripture-forge-platform-extensions/issues",
+  "localizedDisplayInfo": {
+    "en": {
+      "displayName": "Scripture Forge Extension",
+      "shortSummary": "Scripture Forge extension for Platform.Bible",
+      "description": "assets/descriptions/description-en.md"
+    }
+  }
+}

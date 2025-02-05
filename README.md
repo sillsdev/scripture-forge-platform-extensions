@@ -1,8 +1,8 @@
-# paranext-multi-extension-template
+# scripture-forge-platform-extensions
 
-Template for creating multiple Platform.Bible extensions in one repo
+Scripture Forge extensions for Platform.Bible
 
-<!-- <!-- Opening comment tag for Template Info Section. Ignore this for now. More info in [Hide Template Info](#hide-template-info). -->
+<!-- Opening comment tag for Template Info Section. Ignore this for now. More info in [Hide Template Info](#hide-template-info).
 
 ## Template Info
 
