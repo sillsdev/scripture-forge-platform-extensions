@@ -1,8 +1,8 @@
 {
-  "name": "paranext-multi-extension-template",
+  "name": "scripture-forge-platform-extensions",
   "private": true,
   "version": "0.0.1",
-  "author": "Paranext",
+  "author": "SIL",
   "license": "MIT",
   "scripts": {
     "build:web-view": "webpack --config ./webpack/webpack.config.web-view.ts",
