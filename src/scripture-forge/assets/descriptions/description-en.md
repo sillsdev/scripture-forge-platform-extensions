@@ -1,3 +1,5 @@
-Extension template for Platform.Bible. Powered by webpack.
+Scripture Forge extension for Platform.Bible
 
-This is a webpack project template pre-configured to build a Platform.Bible extension. It contains the bare minimum of what an extension needs.
+Allows you to view Slingshot drafts generated in Scripture Forge.
+
+TODO: Add description, features, limitations

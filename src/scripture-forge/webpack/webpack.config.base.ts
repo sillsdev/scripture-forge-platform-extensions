@@ -142,14 +142,14 @@ const configBase: webpack.Configuration = {
       '@emotion/react': path.resolve(
         __dirname,
         '..',
-        '../paranext-core/node_modules/@emotion/react',
+        '../../../paranext-core/node_modules/@emotion/react',
       ),
       '@emotion/styled': path.resolve(
         __dirname,
         '..',
-        '../paranext-core/node_modules/@emotion/styled',
+        '../../../paranext-core/node_modules/@emotion/styled',
       ),
-      '@mui/material': path.resolve(__dirname, '..', '../paranext-core/node_modules/@mui/material'),
+      '@mui/material': path.resolve(__dirname, '..', '../../../paranext-core/node_modules/@mui/material'),
     },
   },
 };
