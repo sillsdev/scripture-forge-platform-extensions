@@ -1,9 +1,9 @@
 {
-  "name": "paranext-extension-template",
+  "name": "scripture-forge",
   "version": "0.0.1",
-  "publisher": "paranext",
+  "publisher": "scriptureForge",
   "displayData": "assets/displayData.json",
-  "author": "Paranext",
+  "author": "SIL",
   "license": "MIT",
   "main": "src/main.ts",
   "extensionDependencies": {},
