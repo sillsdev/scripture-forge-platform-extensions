@@ -20,7 +20,7 @@ const configMain: () => Promise<webpack.Configuration> = async () => {
     // #region shared with https://github.com/paranext/paranext-extension-template/blob/main/webpack/webpack.config.main.ts
 
     // Build for node since Platform.Bible loads this in node https://webpack.js.org/concepts/targets/
-    target: 'node',
+    // target: 'node',
     // configuration name
     name: 'main',
     // wait until webView bundling finishes - webpack.config.web-view.ts
@@ -35,6 +35,7 @@ const configMain: () => Promise<webpack.Configuration> = async () => {
       },
       // Empty the output folder before building
       clean: true,
+      chunkFormat: 'commonjs',
     },
     resolve: {
       plugins: [
