@@ -1,5 +1,5 @@
 {
-  "name": "scripture-forge",
+  "name": "scriptureForge",
   "version": "0.0.1",
   "publisher": "scriptureForge",
   "displayData": "assets/displayData.json",
@@ -7,7 +7,7 @@
   "license": "MIT",
   "main": "src/main.ts",
   "extensionDependencies": {},
-  "elevatedPrivileges": [],
+  "elevatedPrivileges": ["handleUri"],
   "types": "src/types/scripture-forge.d.ts",
   "menus": "contributions/menus.json",
   "settings": "contributions/settings.json",
