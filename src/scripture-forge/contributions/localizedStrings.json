@@ -1,6 +1,12 @@
 {
   "metadata": {},
   "localizedStrings": {
-    "en": {}
+    "en": {
+      "%settings_scripture_forge_group1_label%": "Scripture Forge Settings",
+      "%settings_scripture_forge_serverConfiguration_label%": "Targeted Servers",
+      "%settings_scripture_forge_serverConfiguration_description%": "Configuration determining which servers to use for Scripture Forge and authentication. You can use the presets `live`, `qa`, or `dev`, or you can specify your own configuration in JSON following the `ServerConfiguration` type in the `scripture-forge` extension.",
+      "%settings_scripture_forge_shouldShowSlingshotDisclaimer_label%": "Show Notice about Feature Limits",
+      "%settings_scripture_forge_shouldShowSlingshotDisclaimer_description%": "Whether to show a notice about Slingshot feature limits on the Scripture Forge web view."
+    }
   }
 }
