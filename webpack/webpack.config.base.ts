@@ -41,6 +41,9 @@ const configBase: webpack.Configuration = {
   // Modules that Platform.Bible supplies to extensions https://webpack.js.org/configuration/externals/
   // All other dependencies must be bundled into the extension
   externals: [
+    // Build-in node modules that are not blocked by Platform.Bible
+    'crypto',
+    // Additional modules provided by Platform.Bible
     'react',
     'react/jsx-runtime',
     'react-dom',
