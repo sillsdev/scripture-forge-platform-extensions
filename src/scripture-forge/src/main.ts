@@ -189,6 +189,15 @@ export async function activate(context: ExecutionActivationContext) {
 
   // #endregion
 
+  const openScriptureForgeCommandPromise = papi.commands.registerCommand(
+    'scriptureForge.openScriptureForge',
+    async () => {
+      return papi.webViews.openWebView(SCRIPTURE_FORGE_HOME_WEB_VIEW_TYPE, {
+        type: 'tab',
+      });
+    },
+  );
+
   // Await registration promises at the end so we don't hold everything else up
   context.registrations.add(
     await homeWebViewProviderPromise,
@@ -200,6 +209,7 @@ export async function activate(context: ExecutionActivationContext) {
     await isLoggedInCommandPromise,
     await openScriptureForgeCommandPromise,
     await slingshotPdpefPromise,
+    await openScriptureForgeCommandPromise,
   );
 
   // On first startup, create or get existing webview if one already exists for this type
