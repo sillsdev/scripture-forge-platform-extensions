@@ -41,6 +41,30 @@ globalThis.webViewComponent = function ScriptureForgeHome() {
     false,
   );
 
+  const [projectsInfo] = usePromise(
+    useCallback(async () => {
+      if (!isLoggedIn) return [];
+
+      const projectMetadata = await papi.projectLookup.getMetadataForAllProjects({
+        includeProjectInterfaces: ['scriptureForge.slingshotDraftInfo'],
+      });
+      const projectInfo = await Promise.all(
+        projectMetadata.map(async (data) => {
+          const pdp = await papi.projectDataProviders.get('platform.base', data.id);
+          return {
+            projectId: data.id,
+            isEditable: await pdp.getSetting('platform.isEditable'),
+            fullName: await pdp.getSetting('platform.fullName'),
+            name: await pdp.getSetting('platform.name'),
+            language: await pdp.getSetting('platform.language'),
+          };
+        }),
+      );
+      return projectInfo;
+    }, [isLoggedIn]),
+    [],
+  );
+
   /**
    * Logs in or out
    *
@@ -77,6 +101,20 @@ globalThis.webViewComponent = function ScriptureForgeHome() {
       >
         {logInOrOutButtonContents}
       </Button>
+      <p>Projects</p>
+      {projectsInfo.map((projectInfo) => (
+        <Button
+          key={projectInfo.projectId}
+          onClick={() =>
+            papi.commands.sendCommand(
+              'platformScriptureEditor.openResourceViewer',
+              projectInfo.projectId,
+            )
+          }
+        >
+          {projectInfo.name} - {projectInfo.fullName} - {projectInfo.language}
+        </Button>
+      ))}
     </div>
   );
 };
