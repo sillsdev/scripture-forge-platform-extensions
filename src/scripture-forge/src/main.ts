@@ -3,11 +3,11 @@ import { ExecutionActivationContext, IWebViewProvider } from '@papi/core';
 import { isString } from 'platform-bible-utils';
 import ScriptureForgeAuthenticationProvider, {
   AUTH_PATH,
-  SERVER_CONFIGURATION_PRESET_NAMES,
 } from './auth/scripture-forge-authentication-provider.model';
 import SecureStorageManager from './auth/secure-storage-manager.model';
 import homeWebView from './home/home.web-view?inline';
 import tailwindStyles from './tailwind.css?inline';
+import { SERVER_CONFIGURATION_PRESET_NAMES } from './auth/server-configuration.model';
 
 type IWebViewProviderWithType = IWebViewProvider & { webViewType: string };
 

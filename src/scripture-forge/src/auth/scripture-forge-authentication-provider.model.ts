@@ -11,6 +11,7 @@ import crypto from 'crypto';
 import { logger } from '@papi/backend';
 import { StatusCodes } from 'http-status-codes';
 import SecureStorageManager from './secure-storage-manager.model';
+import { expandServerConfiguration } from './server-configuration.model';
 
 type AuthorizeRequestUrlParams = {
   response_type: 'code';
@@ -70,15 +71,7 @@ type RevokeRefreshTokenRequestBody = {
 
 /** Path on extension redirect URL for picking up auth response */
 export const AUTH_PATH = '/callback/auth0';
-/**
- * Names of the presets for server configuration settings - lets the user connect to different sets
- * of servers easily
- */
-export const SERVER_CONFIGURATION_PRESET_NAMES: ServerConfigurationPresetNames[] = [
-  'dev',
-  'qa',
-  'live',
-];
+
 /** Necessary auth scopes for accessing Slingshot drafts */
 const SCOPES = ['openid', 'profile', 'email', 'sf_data', 'offline_access'].join(' ');
 /** Auth audience for Scripture Forge...? */
@@ -90,50 +83,11 @@ const AUDIENCE = 'https://scriptureforge.org/';
  */
 const CODE_VERIFIER_BUFFER_LENGTH = 32;
 
-/** Sets of configuration for which servers to use */
-const SERVER_CONFIGURATIONS: {
-  [configuration in ServerConfigurationPresetNames]: ServerConfiguration;
-} = {
-  dev: {
-    scriptureForge: {
-      domain: 'localhost',
-    },
-    auth: {
-      domain: 'https://sil-appbuilder.auth0.com',
-      clientId: 'aoAGb9Yx1H5WIsvCW6JJCteJhSa37ftH',
-    },
-  },
-  qa: {
-    scriptureForge: {
-      domain: 'https://qa.scriptureforge.org',
-    },
-    auth: {
-      domain: 'https://dev-sillsdev.auth0.com',
-      clientId: '4eHLjo40mAEGFU6zUxdYjnpnC1K1Ydnj',
-    },
-  },
-  live: {
-    scriptureForge: {
-      domain: 'https://scriptureforge.org',
-    },
-    auth: {
-      domain: 'https://login.languagetechnology.org',
-      clientId: 'tY2wXn40fsL5VsPM4uIHNtU6ZUEXGeFn',
-    },
-  },
-};
-
 /**
  * Max time in milliseconds to wait after opening the browser to the authorization site before we
  * receive an authorization code
  */
 const AUTHORIZE_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
-
-function expandServerConfiguration(
-  configuration: ServerConfigurationPresetNames | ServerConfiguration,
-): ServerConfiguration {
-  return isString(configuration) ? SERVER_CONFIGURATIONS[configuration] : configuration;
-}
 
 function createAuthorizationCodeAsyncVariable() {
   const authCodeAsyncVariable = new AsyncVariable<string>(
