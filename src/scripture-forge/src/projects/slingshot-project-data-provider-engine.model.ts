@@ -20,7 +20,6 @@ import ScriptureForgeAPI, { ScriptureForgeProjectInfo } from './scripture-forge-
  * we do not want it to show up in the Open Resource dialog.
  */
 // TypeScript is upset without `satisfies` here because `as const` makes the array readonly but it
-
 // needs to be used in ProjectMetadata as not readonly :p
 export const SLINGSHOT_PROJECT_INTERFACES = [
   'platform.base',
@@ -174,14 +173,14 @@ export default class SlingshotProjectDataProviderEngine
     switch (key) {
       case 'platform.fullName':
         return (
-          // TypeScript doesn't realize ProjectSettingName is 'platform.name' in this case for some reason
+          // TypeScript doesn't realize ProjectSettingName is 'platform.fullName' in this case for some reason
           // eslint-disable-next-line no-type-assertion/no-type-assertion
           (this.projectInfo.name as ProjectSettingTypes[ProjectSettingName]) ??
           papi.projectSettings.getDefault(key)
         );
       case 'platform.name':
         return (
-          // TypeScript doesn't realize ProjectSettingName is 'platform.shortName' in this case for some reason
+          // TypeScript doesn't realize ProjectSettingName is 'platform.name' in this case for some reason
           // eslint-disable-next-line no-type-assertion/no-type-assertion
           (this.projectInfo.shortName as ProjectSettingTypes[ProjectSettingName]) ??
           papi.projectSettings.getDefault(key)

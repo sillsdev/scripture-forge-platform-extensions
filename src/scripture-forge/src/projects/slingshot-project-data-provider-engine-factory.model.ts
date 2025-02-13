@@ -30,21 +30,21 @@ export default class SlingshotProjectDataProviderEngineFactory
 
   async getAvailableProjects(): Promise<ProjectMetadataWithoutFactoryInfo[]> {
     const projectsInfo = await this.scriptureForgeAPI.getProjects();
-    return projectsInfo
-      ? projectsInfo.map((projectInfo) => {
-          const appProjectId = getSlingshotAppProjectId(projectInfo.paratextId);
 
-          this.projectInfoByAppProjectId.set(appProjectId, projectInfo);
+    if (!projectsInfo) return [];
 
-          // TODO: If the project info updates, update existing PDP
+    return projectsInfo.map((projectInfo) => {
+      const appProjectId = getSlingshotAppProjectId(projectInfo.paratextId);
 
-          return {
-            projectInterfaces: SLINGSHOT_PROJECT_INTERFACES,
-            id: appProjectId,
-            name: projectInfo.shortName,
-          };
-        })
-      : [];
+      this.projectInfoByAppProjectId.set(appProjectId, projectInfo);
+
+      // TODO: If the project info updates, update existing PDP
+
+      return {
+        projectInterfaces: SLINGSHOT_PROJECT_INTERFACES,
+        id: appProjectId,
+      };
+    });
   }
 
   async createProjectDataProviderEngine(

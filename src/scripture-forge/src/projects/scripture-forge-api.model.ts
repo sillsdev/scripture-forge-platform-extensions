@@ -62,10 +62,11 @@ export default class ScriptureForgeAPI {
     const projectResponse =
       await this.authenticationProvider.fetchWithAuthorization(PROJECT_ENDPOINT);
 
+    if (!projectResponse.ok) return undefined;
+
     // We can infer that this json will come back as a ScriptureForgeProjectInfo[]
     // eslint-disable-next-line no-type-assertion/no-type-assertion
-    if (projectResponse.ok) return (await projectResponse.json()) as ScriptureForgeProjectInfo[];
-    return undefined;
+    return (await projectResponse.json()) as ScriptureForgeProjectInfo[];
   }
 
   /**
@@ -84,14 +85,14 @@ export default class ScriptureForgeAPI {
       await this.authenticationProvider.fetchWithAuthorization(lastCompletedDraftStatusEndpoint);
 
     if (
-      lastCompletedDraftStatusResponse.ok &&
-      lastCompletedDraftStatusResponse.status !== StatusCodes.NO_CONTENT
+      !lastCompletedDraftStatusResponse.ok ||
+      lastCompletedDraftStatusResponse.status === StatusCodes.NO_CONTENT
     )
-      // We can infer that this json will come back as a SlingshotDraftBuildInfo
-      // eslint-disable-next-line no-type-assertion/no-type-assertion
-      return (await lastCompletedDraftStatusResponse.json()) as SlingshotDraftBuildInfo;
+      return lastCompletedDraftStatusResponse.status;
 
-    return lastCompletedDraftStatusResponse.status;
+    // We can infer that this json will come back as a SlingshotDraftBuildInfo
+    // eslint-disable-next-line no-type-assertion/no-type-assertion
+    return (await lastCompletedDraftStatusResponse.json()) as SlingshotDraftBuildInfo;
   }
 
   /**
@@ -112,14 +113,14 @@ export default class ScriptureForgeAPI {
       );
 
     if (
-      currentlyGeneratingDraftStatusResponse.ok &&
-      currentlyGeneratingDraftStatusResponse.status !== StatusCodes.NO_CONTENT
+      !currentlyGeneratingDraftStatusResponse.ok ||
+      currentlyGeneratingDraftStatusResponse.status === StatusCodes.NO_CONTENT
     )
-      // We can infer that this json will come back as a SlingshotDraftBuildInfo
-      // eslint-disable-next-line no-type-assertion/no-type-assertion
-      return (await currentlyGeneratingDraftStatusResponse.json()) as SlingshotDraftBuildInfo;
+      return currentlyGeneratingDraftStatusResponse.status;
 
-    return currentlyGeneratingDraftStatusResponse.status;
+    // We can infer that this json will come back as a SlingshotDraftBuildInfo
+    // eslint-disable-next-line no-type-assertion/no-type-assertion
+    return (await currentlyGeneratingDraftStatusResponse.json()) as SlingshotDraftBuildInfo;
   }
 
   /**
@@ -142,12 +143,13 @@ export default class ScriptureForgeAPI {
     );
 
     if (
-      getDraftChapterUsxResponse.ok &&
-      getDraftChapterUsxResponse.status !== StatusCodes.NO_CONTENT
+      !getDraftChapterUsxResponse.ok ||
+      getDraftChapterUsxResponse.status === StatusCodes.NO_CONTENT
     )
-      // We can infer that this json will come back as a string
-      // eslint-disable-next-line no-type-assertion/no-type-assertion
-      return (await getDraftChapterUsxResponse.json()) as string;
-    return getDraftChapterUsxResponse.status;
+      return getDraftChapterUsxResponse.status;
+
+    // We can infer that this json will come back as a string
+    // eslint-disable-next-line no-type-assertion/no-type-assertion
+    return (await getDraftChapterUsxResponse.json()) as string;
   }
 }

@@ -8,6 +8,9 @@ import SecureStorageManager from './auth/secure-storage-manager.model';
 import homeWebView from './home/home.web-view?inline';
 import tailwindStyles from './tailwind.css?inline';
 import { SERVER_CONFIGURATION_PRESET_NAMES } from './auth/server-configuration.model';
+import ScriptureForgeAPI from './projects/scripture-forge-api.model';
+import SlingshotProjectDataProviderEngineFactory from './projects/slingshot-project-data-provider-engine-factory.model';
+import { SLINGSHOT_PROJECT_INTERFACES } from './projects/slingshot-project-data-provider-engine.model';
 
 type IWebViewProviderWithType = IWebViewProvider & { webViewType: string };
 
@@ -39,7 +42,8 @@ export async function activate(context: ExecutionActivationContext) {
     homeWebViewProvider,
   );
 
-  // Validate settings
+  // #region Validate settings
+
   const serverConfigurationValidatorPromise = papi.settings.registerValidator(
     'scriptureForge.serverConfiguration',
     // TODO: Localize these error messages. Do we do this in other validators?
@@ -71,7 +75,9 @@ export async function activate(context: ExecutionActivationContext) {
     async (newShowDisclaimer) => typeof newShowDisclaimer === 'boolean',
   );
 
-  // Set up authentication provider for logging into Scripture Forge
+  // #endregion
+
+  // #region Set up authentication provider for logging into Scripture Forge
 
   const serverConfiguration = await papi.settings.get('scriptureForge.serverConfiguration');
 
@@ -158,6 +164,21 @@ export async function activate(context: ExecutionActivationContext) {
     authenticationProvider.isLoggedIn(),
   );
 
+  // #endregion
+
+  // #region set up Slingshot PDPF
+
+  const scriptureForgeAPI = new ScriptureForgeAPI(authenticationProvider);
+
+  const slingshotPdpef = new SlingshotProjectDataProviderEngineFactory(scriptureForgeAPI);
+  const slingshotPdpefPromise = papi.projectDataProviders.registerProjectDataProviderEngineFactory(
+    'scriptureForge.slingshotPdpf',
+    SLINGSHOT_PROJECT_INTERFACES,
+    slingshotPdpef,
+  );
+
+  // #endregion
+
   // Await registration promises at the end so we don't hold everything else up
   context.registrations.add(
     await homeWebViewProviderPromise,
@@ -167,6 +188,7 @@ export async function activate(context: ExecutionActivationContext) {
     await loginCommandPromise,
     await logoutCommandPromise,
     await isLoggedInCommandPromise,
+    await slingshotPdpefPromise,
   );
 
   // On first startup, create or get existing webview if one already exists for this type
