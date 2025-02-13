@@ -2,7 +2,15 @@
   "mainMenu": {
     "columns": {},
     "groups": {},
-    "items": []
+    "items": [
+      {
+        "label": "%mainMenu_scripture_forge_openScriptureForge_label%",
+        "localizeNotes": "Application main menu > Project > Open Scripture Forge",
+        "group": "platform.projectResources",
+        "order": 1002,
+        "command": "scriptureForge.openScriptureForge"
+      }
+    ]
   },
   "defaultWebViewTopMenu": {
     "columns": {},

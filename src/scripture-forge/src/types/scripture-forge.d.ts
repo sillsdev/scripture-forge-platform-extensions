@@ -181,6 +181,12 @@ declare module 'papi-shared-types' {
      * @returns `true` if the user is logged in, `false` if the user is not logged in
      */
     'scriptureForge.isLoggedIn': () => Promise<boolean>;
+    /**
+     * Opens a new Scripture Forge home web view and returns the WebView id
+     *
+     * @returns WebView id for new Scripture Forge home WebView or `undefined` if not created
+     */
+    'scriptureForge.openScriptureForge': () => Promise<string | undefined>;
   }
 
   export interface ProjectDataProviderInterfaces {

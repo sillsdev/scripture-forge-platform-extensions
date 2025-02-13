@@ -12,6 +12,7 @@ import { SERVER_CONFIGURATION_PRESET_NAMES } from './auth/server-configuration.m
 type IWebViewProviderWithType = IWebViewProvider & { webViewType: string };
 
 const HAS_COMPLETED_FIRST_STARTUP_KEY = 'hasCompletedFirstStartup';
+const SCRIPTURE_FORGE_HOME_WEB_VIEW_TYPE = 'scriptureForge.home';
 
 /** Simple web view provider that provides Scripture Forge Home web views when papi requests them */
 const homeWebViewProvider: IWebViewProviderWithType = {
@@ -158,6 +159,15 @@ export async function activate(context: ExecutionActivationContext) {
     authenticationProvider.isLoggedIn(),
   );
 
+  const openScriptureForgeCommandPromise = papi.commands.registerCommand(
+    'scriptureForge.openScriptureForge',
+    async () => {
+      return papi.webViews.openWebView(SCRIPTURE_FORGE_HOME_WEB_VIEW_TYPE, {
+        type: 'tab',
+      });
+    },
+  );
+
   // Await registration promises at the end so we don't hold everything else up
   context.registrations.add(
     await homeWebViewProviderPromise,
@@ -167,6 +177,7 @@ export async function activate(context: ExecutionActivationContext) {
     await loginCommandPromise,
     await logoutCommandPromise,
     await isLoggedInCommandPromise,
+    await openScriptureForgeCommandPromise,
   );
 
   // On first startup, create or get existing webview if one already exists for this type
