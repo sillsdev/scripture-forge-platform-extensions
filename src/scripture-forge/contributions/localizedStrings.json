@@ -2,6 +2,9 @@
   "metadata": {},
   "localizedStrings": {
     "en": {
+      "%project_settings_scriptureForge_group1_label%": "Scripture Forge Project Settings",
+      "%project_settings_scriptureForge_projectId_label%": "Scripture Forge Project ID",
+      "%project_settings_scriptureForge_projectId_description%": "This project's ID according to Scripture Forge. It is generated upon connecting a project to Scripture Forge. This is distinct from the project's ID according to Paratext. Empty means the project is not connected to Scripture Forge.",
       "%settings_scripture_forge_group1_label%": "Scripture Forge Settings",
       "%settings_scripture_forge_serverConfiguration_label%": "Targeted Servers",
       "%settings_scripture_forge_serverConfiguration_description%": "Configuration determining which servers to use for Scripture Forge and authentication. You can use the presets `live`, `qa`, or `dev`, or you can specify your own configuration in JSON following the `ServerConfiguration` type in the `scripture-forge` extension.",

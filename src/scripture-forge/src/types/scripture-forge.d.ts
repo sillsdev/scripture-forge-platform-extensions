@@ -152,8 +152,24 @@ declare module 'papi-shared-types' {
   } from 'scripture-forge';
 
   export interface SettingTypes {
+    /**
+     * Configuration determining which servers to use for Scripture Forge and authentication. You
+     * can use the presets {@link ServerConfigurationPresetNames}, or you can specify your own
+     * configuration in JSON following the {@link ServerConfiguration} type in the `scripture-forge`
+     * extension.
+     */
     'scriptureForge.serverConfiguration': ServerConfigurationPresetNames | ServerConfiguration;
+    /** Whether to show a notice about Slingshot feature limits on the Scripture Forge web view. */
     'scriptureForge.shouldShowSlingshotDisclaimer': boolean;
+  }
+
+  export interface ProjectSettingTypes {
+    /**
+     * This project's ID according to Scripture Forge. It is generated upon connecting a project to
+     * Scripture Forge. This is distinct from the project's ID according to Paratext. Empty means
+     * the project is not connected to Scripture Forge.
+     */
+    'scriptureForge.scriptureForgeProjectId': string;
   }
 
   export interface CommandHandlers {

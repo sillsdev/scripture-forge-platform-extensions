@@ -148,8 +148,7 @@ export default class ScriptureForgeAPI {
     )
       return getDraftChapterUsxResponse.status;
 
-    // We can infer that this json will come back as a string
-    // eslint-disable-next-line no-type-assertion/no-type-assertion
-    return (await getDraftChapterUsxResponse.json()) as string;
+    // The usx will come as a text string
+    return getDraftChapterUsxResponse.text();
   }
 }

@@ -1,7 +1,8 @@
 import papi, { logger } from '@papi/frontend';
 import { useSetting } from '@papi/frontend/react';
 import { Button, Spinner, useEvent, usePromise } from 'platform-bible-react';
-import { ReactNode, useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { expandServerConfiguration } from '../auth/server-configuration.model';
 
 globalThis.webViewComponent = function ScriptureForgeHome() {
   const isMounted = useRef(false);
@@ -11,6 +12,12 @@ globalThis.webViewComponent = function ScriptureForgeHome() {
       isMounted.current = false;
     };
   });
+
+  const [serverConfigurationCondensed] = useSetting('scriptureForge.serverConfiguration', 'live');
+  const serverConfiguration = useMemo(
+    () => expandServerConfiguration(serverConfigurationCondensed),
+    [serverConfigurationCondensed],
+  );
 
   const [shouldShowSlingshotDisclaimer] = useSetting(
     'scriptureForge.shouldShowSlingshotDisclaimer',
@@ -57,6 +64,7 @@ globalThis.webViewComponent = function ScriptureForgeHome() {
             fullName: await pdp.getSetting('platform.fullName'),
             name: await pdp.getSetting('platform.name'),
             language: await pdp.getSetting('platform.language'),
+            scriptureForgeProjectId: await pdp.getSetting('scriptureForge.scriptureForgeProjectId'),
           };
         }),
       );
@@ -109,6 +117,25 @@ globalThis.webViewComponent = function ScriptureForgeHome() {
             papi.commands.sendCommand(
               'platformScriptureEditor.openResourceViewer',
               projectInfo.projectId,
+              {
+                decorations: {
+                  headers: {
+                    'slingshot-ai-header': {
+                      title: 'AI Generated',
+                      iconUrl:
+                        'papi-extension://scriptureForge/assets/images/lucide-sparkles-0.378.0.svg',
+                      descriptionMd: `*This is an AI-generated pretranslation and contains errors. [Open in Scripture Forge](${serverConfiguration.scriptureForge.domain}/projects/${projectInfo.scriptureForgeProjectId}/draft-generation)*`,
+                    },
+                  },
+                  containers: {
+                    'slingshot-ai-container': {
+                      style: {
+                        border: 'dashed hsl(var(--muted-foreground))',
+                      },
+                    },
+                  },
+                },
+              },
             )
           }
         >

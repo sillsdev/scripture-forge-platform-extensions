@@ -24,16 +24,16 @@ import ScriptureForgeAPI, { ScriptureForgeProjectInfo } from './scripture-forge-
 export const SLINGSHOT_PROJECT_INTERFACES = [
   'platform.base',
   'scriptureForge.slingshotDraftInfo',
-] as const satisfies ['platform.base', 'scriptureForge.slingshotDraftInfo'];
+  'platformScripture.USJ_Chapter',
+] as const satisfies [
+  'platform.base',
+  'scriptureForge.slingshotDraftInfo',
+  'platformScripture.USJ_Chapter',
+];
 
 export default class SlingshotProjectDataProviderEngine
-  extends BaseProjectDataProviderEngine<
-    [...typeof SLINGSHOT_PROJECT_INTERFACES, 'platformScripture.USJ_Chapter']
-  >
-  implements
-    IBaseProjectDataProviderEngine<
-      [...typeof SLINGSHOT_PROJECT_INTERFACES, 'platformScripture.USJ_Chapter']
-    >
+  extends BaseProjectDataProviderEngine<typeof SLINGSHOT_PROJECT_INTERFACES>
+  implements IBaseProjectDataProviderEngine<typeof SLINGSHOT_PROJECT_INTERFACES>
 {
   private draftInfo: SlingshotDraftInfo | undefined;
 
@@ -197,6 +197,13 @@ export default class SlingshotProjectDataProviderEngine
           // TypeScript doesn't realize ProjectSettingName is 'platform.language' in this case for some reason
           // eslint-disable-next-line no-type-assertion/no-type-assertion
           (this.projectInfo.languageTag as ProjectSettingTypes[ProjectSettingName]) ??
+          papi.projectSettings.getDefault(key)
+        );
+      case 'scriptureForge.scriptureForgeProjectId':
+        return (
+          // TypeScript doesn't realize ProjectSettingName is 'scriptureForge.scriptureForgeProjectId' in this case for some reason
+          // eslint-disable-next-line no-type-assertion/no-type-assertion
+          (this.projectInfo.projectId as ProjectSettingTypes[ProjectSettingName]) ??
           papi.projectSettings.getDefault(key)
         );
       default:
