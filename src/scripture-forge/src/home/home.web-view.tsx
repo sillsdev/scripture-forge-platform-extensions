@@ -1,8 +1,18 @@
 import papi, { logger } from '@papi/frontend';
-import { useSetting } from '@papi/frontend/react';
-import { Button, Spinner, useEvent, usePromise } from 'platform-bible-react';
-import { ReactNode, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { expandServerConfiguration } from '../auth/server-configuration.model';
+import {
+  Button,
+  Spinner,
+  useEvent,
+  usePromise,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Label,
+} from 'platform-bible-react';
+import { ReactNode, useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import ProjectTable from './project-table.component';
 
 globalThis.webViewComponent = function ScriptureForgeHome() {
   const isMounted = useRef(false);
@@ -12,17 +22,6 @@ globalThis.webViewComponent = function ScriptureForgeHome() {
       isMounted.current = false;
     };
   });
-
-  const [serverConfigurationCondensed] = useSetting('scriptureForge.serverConfiguration', 'live');
-  const serverConfiguration = useMemo(
-    () => expandServerConfiguration(serverConfigurationCondensed),
-    [serverConfigurationCondensed],
-  );
-
-  const [shouldShowSlingshotDisclaimer] = useSetting(
-    'scriptureForge.shouldShowSlingshotDisclaimer',
-    false,
-  );
 
   const [sessionChangeListener, didChangeSession] = useReducer((x) => x + 1, 0);
   useEvent(
@@ -48,31 +47,6 @@ globalThis.webViewComponent = function ScriptureForgeHome() {
     false,
   );
 
-  const [projectsInfo] = usePromise(
-    useCallback(async () => {
-      if (!isLoggedIn) return [];
-
-      const projectMetadata = await papi.projectLookup.getMetadataForAllProjects({
-        includeProjectInterfaces: ['scriptureForge.slingshotDraftInfo'],
-      });
-      const projectInfo = await Promise.all(
-        projectMetadata.map(async (data) => {
-          const pdp = await papi.projectDataProviders.get('platform.base', data.id);
-          return {
-            projectId: data.id,
-            isEditable: await pdp.getSetting('platform.isEditable'),
-            fullName: await pdp.getSetting('platform.fullName'),
-            name: await pdp.getSetting('platform.name'),
-            language: await pdp.getSetting('platform.language'),
-            scriptureForgeProjectId: await pdp.getSetting('scriptureForge.scriptureForgeProjectId'),
-          };
-        }),
-      );
-      return projectInfo;
-    }, [isLoggedIn]),
-    [],
-  );
-
   /**
    * Logs in or out
    *
@@ -91,57 +65,45 @@ globalThis.webViewComponent = function ScriptureForgeHome() {
   };
 
   let logInOrOutButtonContents: ReactNode = isLoggedIn ? 'Log out' : 'Log in';
-  if (isLoginBusy) logInOrOutButtonContents = <Spinner />;
+  if (isLoginBusy) logInOrOutButtonContents = <Spinner className="tw-h-4 tw-w-4" />;
 
-  return (
-    <div>
-      <h1>Scripture Forge Home</h1>
-      <p>Welcome to Scripture Forge!</p>
-      {shouldShowSlingshotDisclaimer && (
-        <p>TODO: Slingshot Disclaimer. Add OK button and Do not show again button</p>
-      )}
-      <Button
-        onClick={() => {
-          logInOrOut(!isLoggedIn);
-        }}
-        disabled={isLoginBusy}
-        variant={isLoggedIn ? 'ghost' : 'default'}
-      >
-        {logInOrOutButtonContents}
-      </Button>
-      <p>Projects</p>
-      {projectsInfo.map((projectInfo) => (
+  return !isLoggedIn ? (
+    <div className="tw-flex tw-bg-muted/50 tw-h-screen tw-items-center tw-justify-center">
+      <Card className="tw-max-w-md">
+        <CardHeader>
+          <CardTitle>Welcome to Scripture Forge!</CardTitle>
+          <CardDescription>Click the button below to login</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            onClick={() => {
+              logInOrOut(!isLoggedIn);
+            }}
+            disabled={isLoginBusy}
+            variant={isLoggedIn ? 'ghost' : 'default'}
+          >
+            {logInOrOutButtonContents}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  ) : (
+    <div className="tw-flex tw-flex-col tw-h-screen">
+      <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-h-16 tw-px-4">
+        <Label className="tw-text-2xl tw-font-semibold">My Scripture Forge Projects</Label>
         <Button
-          key={projectInfo.projectId}
-          onClick={() =>
-            papi.commands.sendCommand(
-              'platformScriptureEditor.openResourceViewer',
-              projectInfo.projectId,
-              {
-                decorations: {
-                  headers: {
-                    'slingshot-ai-header': {
-                      title: 'AI Generated',
-                      iconUrl:
-                        'papi-extension://scriptureForge/assets/images/lucide-sparkles-0.378.0.svg',
-                      descriptionMd: `*This is an AI-generated pretranslation and contains errors. [Open in Scripture Forge](${serverConfiguration.scriptureForge.domain}/projects/${projectInfo.scriptureForgeProjectId}/draft-generation)*`,
-                    },
-                  },
-                  containers: {
-                    'slingshot-ai-container': {
-                      style: {
-                        border: 'dashed hsl(var(--muted-foreground))',
-                      },
-                    },
-                  },
-                },
-              },
-            )
-          }
+          onClick={() => {
+            logInOrOut(!isLoggedIn);
+          }}
+          disabled={isLoginBusy}
+          variant={isLoggedIn ? 'ghost' : 'default'}
         >
-          {projectInfo.name} - {projectInfo.fullName} - {projectInfo.language}
+          {logInOrOutButtonContents}
         </Button>
-      ))}
+      </div>
+      <div className="tw-flex-1 tw-overflow-auto tw-pt-2 tw-px-1">
+        <ProjectTable />
+      </div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { SlingshotDraftBuildInfo } from 'scripture-forge';
 import { StatusCodes } from 'http-status-codes';
+import { logger } from '@papi/backend';
 import ScriptureForgeAuthenticationProvider from '../auth/scripture-forge-authentication-provider.model';
 
 const PROJECT_ENDPOINT = '/paratext-api/projects';
@@ -59,14 +60,67 @@ export default class ScriptureForgeAPI {
    *   request fails, returns `undefined`.
    */
   async getProjects(): Promise<ScriptureForgeProjectInfo[] | undefined> {
-    const projectResponse =
-      await this.authenticationProvider.fetchWithAuthorization(PROJECT_ENDPOINT);
+    // Hard-coded projects for testing if the getProjects endpoint is not working
+    // return [
+    //   {
+    //     paratextId: 'a7778dadad34e0ecc2e0036d474d75b3c0454273',
+    //     name: 'zzz1 Prod Test',
+    //     shortName: 'zzz1prod',
+    //     languageRegion: null,
+    //     languageScript: null,
+    //     languageTag: 'arb',
+    //     isRightToLeft: null,
+    //     projectId: null,
+    //     isConnectable: true,
+    //     isConnected: false,
+    //   },
+    //   {
+    //     paratextId: '144e90272798340eac0a5c4c0a88340942366316',
+    //     name: 'zzz4 Prod Test',
+    //     shortName: 'zzz4prod',
+    //     languageRegion: 'ZW',
+    //     languageScript: 'Latn',
+    //     languageTag: 'lee-ZW',
+    //     isRightToLeft: null,
+    //     projectId: '67ab7f81f32de1cfd010247f',
+    //     isConnectable: true,
+    //     isConnected: false,
+    //   },
+    //   {
+    //     paratextId: '217343da0a602d7a7c5dc8a587dede89f57d3dbc',
+    //     name: 'zzz6 Prod Test',
+    //     shortName: 'zzz6prod',
+    //     languageRegion: null,
+    //     languageScript: 'Latn',
+    //     languageTag: 'hwc',
+    //     isRightToLeft: null,
+    //     projectId: null,
+    //     isConnectable: false,
+    //     isConnected: false,
+    //   },
+    // ];
+    try {
+      const projectResponse =
+        await this.authenticationProvider.fetchWithAuthorization(PROJECT_ENDPOINT);
 
-    if (!projectResponse.ok) return undefined;
+      if (!projectResponse.ok) {
+        logger.error(
+          `Error fetching projects: ${projectResponse.status} ${projectResponse.statusText}`,
+        );
+        return undefined;
+      }
 
-    // We can infer that this json will come back as a ScriptureForgeProjectInfo[]
-    // eslint-disable-next-line no-type-assertion/no-type-assertion
-    return (await projectResponse.json()) as ScriptureForgeProjectInfo[];
+      if (projectResponse.status === StatusCodes.NO_CONTENT) {
+        return undefined;
+      }
+
+      // We can infer that this json will come back as an array of ScriptureForgeProjectInfo objects
+      // eslint-disable-next-line no-type-assertion/no-type-assertion
+      return (await projectResponse.json()) as ScriptureForgeProjectInfo[];
+    } catch (error) {
+      logger.error('Unexpected error in getProjects:', error);
+      return undefined;
+    }
   }
 
   /**

@@ -312,6 +312,7 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
     const fullUrl = url.startsWith(this.#serverConfiguration.scriptureForge.domain)
       ? url
       : `${this.#serverConfiguration.scriptureForge.domain}${url.startsWith('/') ? '' : '/'}${url}`;
+    logger.info(`Fetching with authorization: ${fullUrl}`);
     const accessToken = await this.#getAccessToken();
     const fullOptions = {
       ...options,
