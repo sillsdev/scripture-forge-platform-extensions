@@ -8,10 +8,14 @@ import SecureStorageManager from './auth/secure-storage-manager.model';
 import homeWebView from './home/home.web-view?inline';
 import tailwindStyles from './tailwind.css?inline';
 import { SERVER_CONFIGURATION_PRESET_NAMES } from './auth/server-configuration.model';
+import ScriptureForgeApi from './projects/scripture-forge-api.model';
+import SlingshotProjectDataProviderEngineFactory from './projects/slingshot-project-data-provider-engine-factory.model';
+import { SLINGSHOT_PROJECT_INTERFACES } from './projects/slingshot-project-data-provider-engine.model';
 
 type IWebViewProviderWithType = IWebViewProvider & { webViewType: string };
 
 const HAS_COMPLETED_FIRST_STARTUP_KEY = 'hasCompletedFirstStartup';
+const SCRIPTURE_FORGE_HOME_WEB_VIEW_TYPE = 'scriptureForge.home';
 
 /** Simple web view provider that provides Scripture Forge Home web views when papi requests them */
 const homeWebViewProvider: IWebViewProviderWithType = {
@@ -23,10 +27,11 @@ const homeWebViewProvider: IWebViewProviderWithType = {
       );
     return {
       iconUrl: 'papi-extension://scriptureForge/assets/images/sf.svg',
-      title: 'Scripture Forge',
+      title: 'Auto Drafts',
       ...savedWebView,
       content: homeWebView,
       styles: tailwindStyles,
+      allowPopups: true,
     };
   },
 };
@@ -39,7 +44,8 @@ export async function activate(context: ExecutionActivationContext) {
     homeWebViewProvider,
   );
 
-  // Validate settings
+  // #region Validate settings
+
   const serverConfigurationValidatorPromise = papi.settings.registerValidator(
     'scriptureForge.serverConfiguration',
     // TODO: Localize these error messages. Do we do this in other validators?
@@ -66,12 +72,10 @@ export async function activate(context: ExecutionActivationContext) {
       return true;
     },
   );
-  const showSlingshotDisclaimerValidatorPromise = papi.settings.registerValidator(
-    'scriptureForge.shouldShowSlingshotDisclaimer',
-    async (newShowDisclaimer) => typeof newShowDisclaimer === 'boolean',
-  );
 
-  // Set up authentication provider for logging into Scripture Forge
+  // #endregion
+
+  // #region Set up authentication provider for logging into Scripture Forge
 
   const serverConfiguration = await papi.settings.get('scriptureForge.serverConfiguration');
 
@@ -158,15 +162,42 @@ export async function activate(context: ExecutionActivationContext) {
     authenticationProvider.isLoggedIn(),
   );
 
+  // #endregion
+
+  // #region set up Slingshot PDPF
+
+  // Uncomment the following line to test the extension without access to Scripture Forge
+  // const scriptureForgeApi = new ScriptureForgeSampleApi(authenticationProvider);
+  const scriptureForgeApi = new ScriptureForgeApi(authenticationProvider);
+
+  const slingshotPdpef = new SlingshotProjectDataProviderEngineFactory(scriptureForgeApi);
+  const slingshotPdpefPromise = papi.projectDataProviders.registerProjectDataProviderEngineFactory(
+    'scriptureForge.slingshotPdpf',
+    SLINGSHOT_PROJECT_INTERFACES,
+    slingshotPdpef,
+  );
+
+  // #endregion
+
+  const openAutoDraftsCommandPromise = papi.commands.registerCommand(
+    'scriptureForge.openAutoDrafts',
+    async () => {
+      return papi.webViews.openWebView(SCRIPTURE_FORGE_HOME_WEB_VIEW_TYPE, {
+        type: 'tab',
+      });
+    },
+  );
+
   // Await registration promises at the end so we don't hold everything else up
   context.registrations.add(
     await homeWebViewProviderPromise,
     await serverConfigurationValidatorPromise,
-    await showSlingshotDisclaimerValidatorPromise,
     await updateServerConfigurationSubscriptionPromise,
     await loginCommandPromise,
     await logoutCommandPromise,
     await isLoggedInCommandPromise,
+    await slingshotPdpefPromise,
+    await openAutoDraftsCommandPromise,
   );
 
   // On first startup, create or get existing webview if one already exists for this type
