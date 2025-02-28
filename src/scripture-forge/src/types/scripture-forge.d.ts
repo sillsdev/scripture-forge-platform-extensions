@@ -75,9 +75,7 @@ declare module 'scripture-forge' {
    *   long)
    * - `cannotAccessDrafts`: The project is set up in Scripture Forge, but this user is not allowed to
    *   access Slingshot drafts. User should contact an admin
-   * - `noFinishedDraft`: This user has joined the project, but there are no drafts. Direct user to
-   *   `/projects/{projectId}/draft-generation` in Scripture Forge
-   * - `hasFinishedDraft`: This user has joined the project, and there is a finished draft.
+   * - 'connected': The user is fully connected to the project and has draft access.
    */
   export type SlingshotProjectConnectionState =
     | 'notLoggedIn'
@@ -85,16 +83,34 @@ declare module 'scripture-forge' {
     | 'canSetUp'
     | 'canJoin'
     | 'cannotAccessDrafts'
+    | 'connected';
+
+  /**
+   * Various possible states of a Scripture Forge project's Slingshot draft setup progress
+   *
+   * - `draftingNotAvailable`: Slingshot drafting capabilities have not been granted to this project.
+   *   If the user is connected to the project, direct user to ask an admin to set up drafting or
+   *   set up drafting at `/projects/{projectId}/draft-generation`
+   * - `noFinishedDraft`: There are no finished drafts. If the user is connected to the project and
+   *   can access drafts, direct user to `/projects/{projectId}/draft-generation` in Scripture
+   *   Forge. Otherwise, direct user to contact an admin
+   * - `hasFinishedDraft`: There is a finished draft. If the user is connected, let them open the
+   *   draft
+   */
+  export type SlingshotDraftSetupState =
+    | 'draftingNotAvailable'
     | 'noFinishedDraft'
     | 'hasFinishedDraft';
 
   /** Information about a Scripture Forge project and Slingshot drafts */
   export type SlingshotDraftInfo = {
     /**
-     * Indicates in what stage of the process of connecting and generating Slingshot drafts this
-     * project is in
+     * Indicates what stage of the process of connecting to Scripture Forge and drafting this user
+     * is in
      */
     connectionState: SlingshotProjectConnectionState;
+    /** Indicates what stage of the process of generating Slingshot drafts this project is in */
+    draftSetupState: SlingshotDraftSetupState;
     /**
      * Information about the latest Slingshot draft in Scripture Forge. Will not be provided if the
      * user cannot access drafts (states `cannotAccessDrafts` and before) or there is not a finished
@@ -116,6 +132,13 @@ declare module 'scripture-forge' {
   /** Provides information about Scripture Forge project and Slingshot drafts */
   export type ISlingshotDraftInfoProjectDataProvider =
     IProjectDataProvider<SlingshotDraftInfoProjectInterfaceDataTypes> & {
+      /**
+       * Attempts to join the project for the currently logged in user.
+       *
+       * @returns `true` if successfully joined, `false` if already joined, and throws if there was
+       *   a problem
+       */
+      join(): Promise<boolean>;
       /**
        * Gets information about this Scripture Forge project, whether Slingshot drafts are
        * available, and more
@@ -152,8 +175,22 @@ declare module 'papi-shared-types' {
   } from 'scripture-forge';
 
   export interface SettingTypes {
+    /**
+     * Configuration determining which servers to use for Scripture Forge and authentication. You
+     * can use the presets {@link ServerConfigurationPresetNames}, or you can specify your own
+     * configuration in JSON following the {@link ServerConfiguration} type in the `scripture-forge`
+     * extension.
+     */
     'scriptureForge.serverConfiguration': ServerConfigurationPresetNames | ServerConfiguration;
-    'scriptureForge.shouldShowSlingshotDisclaimer': boolean;
+  }
+
+  export interface ProjectSettingTypes {
+    /**
+     * This project's ID according to Scripture Forge. It is generated upon connecting a project to
+     * Scripture Forge. This is distinct from the project's ID according to Paratext. Empty means
+     * the project is not connected to Scripture Forge.
+     */
+    'scriptureForge.scriptureForgeProjectId': string;
   }
 
   export interface CommandHandlers {
@@ -181,6 +218,12 @@ declare module 'papi-shared-types' {
      * @returns `true` if the user is logged in, `false` if the user is not logged in
      */
     'scriptureForge.isLoggedIn': () => Promise<boolean>;
+    /**
+     * Opens a new Scripture Forge home web view and returns the WebView id
+     *
+     * @returns WebView id for new Scripture Forge home WebView or `undefined` if not created
+     */
+    'scriptureForge.openAutoDrafts': () => Promise<string | undefined>;
   }
 
   export interface ProjectDataProviderInterfaces {

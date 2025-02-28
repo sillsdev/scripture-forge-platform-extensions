@@ -8,6 +8,8 @@ import { getWebViewEntries } from './webpack.util';
 /** Webpack configuration for building webViews */
 const configWebView: webpack.Configuration = merge(configBase, {
   // Build for web since Platform.Bible loads WebViews in browser https://webpack.js.org/concepts/targets/
+  // Note: Extensions can include polyfills of built-in modules using `resolve.fallback` as
+  // documented at https://webpack.js.org/configuration/resolve/#resolvefallback
   target: 'web',
   // configuration name so we can depend on it in main
   name: 'webView',

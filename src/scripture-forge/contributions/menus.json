@@ -2,7 +2,15 @@
   "mainMenu": {
     "columns": {},
     "groups": {},
-    "items": []
+    "items": [
+      {
+        "label": "%mainMenu_scriptureForge_openAutoDrafts_label%",
+        "localizeNotes": "Application main menu > Project > Open Auto Drafts",
+        "group": "platform.projectResources",
+        "order": 1002,
+        "command": "scriptureForge.openAutoDrafts"
+      }
+    ]
   },
   "defaultWebViewTopMenu": {
     "columns": {},
@@ -13,5 +21,5 @@
     "groups": {},
     "items": []
   },
-  "webViewMenus": {}
+  "webViewMenus": { "scriptureForge.home": {} }
 }

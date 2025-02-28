@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "label": "%project_settings_scriptureForge_group1_label%",
+    "properties": {
+      "scriptureForge.scriptureForgeProjectId": {
+        "label": "%project_settings_scriptureForge_projectId_label%",
+        "description": "%project_settings_scriptureForge_projectId_description%",
+        "default": "",
+        "includeProjectInterfaces": ["^scriptureForge\\.slingshotDraftInfo$"]
+      }
+    }
+  }
+]

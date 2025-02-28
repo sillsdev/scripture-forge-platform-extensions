@@ -1,16 +1,11 @@
 [
   {
-    "label": "%settings_scripture_forge_group1_label%",
+    "label": "%settings_scriptureForge_group1_label%",
     "properties": {
       "scriptureForge.serverConfiguration": {
-        "label": "%settings_scripture_forge_serverConfiguration_label%",
-        "description": "%settings_scripture_forge_serverConfiguration_description%",
+        "label": "%settings_scriptureForge_serverConfiguration_label%",
+        "description": "%settings_scriptureForge_serverConfiguration_description%",
         "default": "live"
-      },
-      "scriptureForge.shouldShowSlingshotDisclaimer": {
-        "label": "%settings_scripture_forge_shouldShowSlingshotDisclaimer_label%",
-        "description": "%settings_scripture_forge_shouldShowSlingshotDisclaimer_description%",
-        "default": true
       }
     }
   }
