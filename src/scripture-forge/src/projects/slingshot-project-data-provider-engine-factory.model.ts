@@ -4,7 +4,7 @@ import {
   ProjectMetadataWithoutFactoryInfo,
 } from '@papi/core';
 import { logger } from '@papi/backend';
-import { Mutex } from 'platform-bible-utils';
+import { getErrorMessage, Mutex } from 'platform-bible-utils';
 import SlingshotProjectDataProviderEngine, {
   SLINGSHOT_PROJECT_INTERFACES,
 } from './slingshot-project-data-provider-engine.model';
@@ -82,15 +82,24 @@ export default class SlingshotProjectDataProviderEngineFactory
       if (!force && lastAvailableProjectsBeforeMutex !== this.lastAvailableProjects)
         return this.lastAvailableProjects;
 
-      const projectsInfo = await this.scriptureForgeApi.getProjects();
-      this.lastGetProjectsTime = Date.now();
-
-      if (typeof projectsInfo === 'number') {
+      let projectsInfo: Awaited<ReturnType<typeof this.scriptureForgeApi.getProjects>>;
+      try {
+        projectsInfo = await this.scriptureForgeApi.getProjects();
+      } catch (e) {
         logger.warn(
-          `Slingshot PDPEF encountered error while getting available projects: ${projectsInfo}`,
+          `Slingshot PDPEF caught Scripture Forge API error while getting available projects. ${getErrorMessage(e)}`,
         );
         return [];
       }
+
+      if (typeof projectsInfo === 'number') {
+        logger.warn(
+          `Slingshot PDPEF received error while getting available projects: ${projectsInfo}`,
+        );
+        return [];
+      }
+
+      this.lastGetProjectsTime = Date.now();
 
       this.lastAvailableProjects = projectsInfo.map((projectInfo) => {
         const appProjectId = getSlingshotAppProjectId(projectInfo.paratextId);
@@ -101,10 +110,7 @@ export default class SlingshotProjectDataProviderEngineFactory
         const pdpe = this.pdpeByAppProjectId.get(appProjectId);
         if (pdpe) pdpe.projectInfo = projectInfo;
 
-        return {
-          projectInterfaces: SLINGSHOT_PROJECT_INTERFACES,
-          id: appProjectId,
-        };
+        return { projectInterfaces: SLINGSHOT_PROJECT_INTERFACES, id: appProjectId };
       });
 
       return this.lastAvailableProjects;
