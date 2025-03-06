@@ -178,7 +178,7 @@ globalThis.webViewComponent = function ScriptureForgeHome({
   if (isLoginBusy) logInOrOutButtonContents = <Spinner className="tw-h-4 tw-w-4" />;
 
   return !isLoggedIn ? (
-    <div className="tw-flex tw-bg-muted/50 tw-h-screen tw-items-center tw-justify-center">
+    <div className="tw-flex tw-bg-muted/50 tw-min-h-screen tw-p-2 tw-items-center tw-justify-center">
       <Card className="tw-max-w-md">
         <CardHeader>
           <CardTitle>{localizedStrings['%scriptureForge_login_page_title%']}</CardTitle>
