@@ -13,9 +13,11 @@ const configMain: webpack.Configuration = merge(configBase, {
   // Build for web (default) because, though Platform.Bible loads this in node, built-in node
   // modules are not available except specific exceptions which are included in
   // `webpack.config.base`'s `externals`. Building for web prevents webpack from assuming it can
-  // `require` the built-in node modules. https://webpack.js.org/concepts/targets/
+  // `require` the built-in node modules. Read more at
+  // https://github.com/paranext/paranext/wiki/Module-import-restrictions
   // Note: Extensions can include polyfills of built-in modules using `resolve.fallback` as
   // documented at https://webpack.js.org/configuration/resolve/#resolvefallback
+  // https://webpack.js.org/concepts/targets/
   target: 'web',
   // configuration name
   name: 'main',
@@ -31,6 +33,9 @@ const configMain: webpack.Configuration = merge(configBase, {
     },
     // Empty the output folder before building
     clean: true,
+    // Set the chunk format to build for a Node.js module even though our target is `web`
+    // https://webpack.js.org/configuration/output/#outputchunkformat
+    chunkFormat: 'commonjs',
   },
   resolve: {
     plugins: [
