@@ -11,7 +11,7 @@ import {
 } from 'scripture-forge';
 import type { ProjectSettingTypes } from 'papi-shared-types';
 import type { USJChapterProjectInterfaceDataTypes } from 'platform-scripture';
-import { VerseRef } from '@sillsdev/scripture';
+import { Canon, SerializedVerseRef } from '@sillsdev/scripture';
 import { Usj } from '@biblionexus-foundation/scripture-utilities';
 import { StatusCodes } from 'http-status-codes';
 import { deepEqual } from 'platform-bible-utils';
@@ -189,12 +189,12 @@ export default class SlingshotProjectDataProviderEngine
     );
   }
 
-  async getChapterUSJ(verseRef: VerseRef): Promise<Usj | undefined> {
+  async getChapterUSJ(verseRef: SerializedVerseRef): Promise<Usj | undefined> {
     if (!this.projectInfo.projectId) return undefined;
 
     const draftChapterUsj = await this.scriptureForgeApi.getDraftChapterUsj(
       this.projectInfo.projectId,
-      verseRef.bookNum,
+      Canon.bookIdToNumber(verseRef.book),
       verseRef.chapterNum,
     );
 
