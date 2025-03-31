@@ -14,7 +14,6 @@ import { SLINGSHOT_PROJECT_INTERFACES } from './projects/slingshot-project-data-
 
 type IWebViewProviderWithType = IWebViewProvider & { webViewType: string };
 
-const HAS_COMPLETED_FIRST_STARTUP_KEY = 'hasCompletedFirstStartup';
 const SCRIPTURE_FORGE_HOME_WEB_VIEW_TYPE = 'scriptureForge.home';
 const SCRIPTURE_FORGE_SLINGSHOT_PDPF_ID = 'scriptureForge.slingshotPdpf';
 
@@ -224,6 +223,11 @@ export async function activate(context: ExecutionActivationContext) {
     await openAutoDraftsCommandPromise,
   );
 
+  // #region first startup actions - disabled for now since this extension is bundled into the app
+  // TODO: un-comment this when the extension is not bundled but rather installed from the marketplace
+
+  /* const HAS_COMPLETED_FIRST_STARTUP_KEY = 'hasCompletedFirstStartup';
+
   // On first startup, create or get existing webview if one already exists for this type
   // Do this in an IIFE so we can finish activating and let others start
   (async () => {
@@ -253,7 +257,9 @@ export async function activate(context: ExecutionActivationContext) {
     } catch (e) {
       logger.warn(`Scripture Forge first startup process threw an error: ${e}`);
     }
-  })();
+  })(); */
+
+  // #endregion
 }
 
 export async function deactivate() {
