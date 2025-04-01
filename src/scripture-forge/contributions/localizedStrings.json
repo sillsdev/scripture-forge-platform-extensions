@@ -2,7 +2,7 @@
   "metadata": {},
   "localizedStrings": {
     "en": {
-      "%mainMenu_scriptureForge_openAutoDrafts_label%": "Open Auto Drafts",
+      "%mainMenu_scriptureForge_openAutoDrafts_label%": "Open Auto Drafts...",
       "%project_settings_scriptureForge_group1_label%": "Scripture Forge Project Settings",
       "%project_settings_scriptureForge_projectId_label%": "Scripture Forge Project ID",
       "%project_settings_scriptureForge_projectId_description%": "This project's ID according to Scripture Forge. It is generated upon connecting a project to Scripture Forge. This is distinct from the project's ID according to Paratext. Empty means the project is not connected to Scripture Forge.",
