@@ -34,7 +34,7 @@ import {
   isString,
   LocalizeKey,
 } from 'platform-bible-utils';
-import { AlertCircle, ExternalUrl } from 'lucide-react';
+import { AlertCircle, ExternalLink } from 'lucide-react';
 import ProjectTable from './project-table.component';
 import { expandServerConfiguration } from '../auth/server-configuration.model';
 
@@ -174,7 +174,7 @@ globalThis.webViewComponent = function ScriptureForgeHome({
 
   let logInOrOutButtonContents: ReactNode = isLoggedIn
     ? localizedStrings['%scriptureForge_home_logout_action_label%']
-    : localizedStrings['%scriptureForge_home_login_action_label%'] <ExternalUrl />;
+    : localizedStrings['%scriptureForge_home_login_action_label%'] <ExternalLink />;
   if (isLoginBusy) logInOrOutButtonContents = <Spinner className="tw-h-4 tw-w-4" />;
 
   return !isLoggedIn ? (
