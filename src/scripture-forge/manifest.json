@@ -1,13 +1,15 @@
 {
   "name": "scriptureForge",
-  "version": "0.0.1",
+  "version": "0.1.0-alpha.0",
   "publisher": "scriptureForge",
   "displayData": "assets/displayData.json",
   "author": "SIL",
   "license": "MIT",
   "main": "src/main.ts",
   "extensionDependencies": {},
-  "elevatedPrivileges": ["handleUri"],
+  "elevatedPrivileges": [
+    "handleUri"
+  ],
   "types": "src/types/scripture-forge.d.ts",
   "menus": "contributions/menus.json",
   "settings": "contributions/settings.json",
