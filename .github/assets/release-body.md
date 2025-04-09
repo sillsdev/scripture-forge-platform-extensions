@@ -1,8 +1,10 @@
 Includes:
 
-- Extensions
+- Scripture Forge Auto Drafts Extension
 
-Tested on Platform.Bible vY.Z.X. Expected to be compatible with at least vY.Z.x.
+Tested on Platform.Bible vX.Y.Z. Expected to be compatible with at least vX.Y.\*.
+
+These extensions are bundled into [Paratext 10 Studio](https://paratextstudio.org) vX.Y.Z.
 
 Install instructions:
 
