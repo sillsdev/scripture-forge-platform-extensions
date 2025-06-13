@@ -31,5 +31,6 @@ temp-build
 
 # generated files
 package-lock.json
+package.json
 
 # #endregion
