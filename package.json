@@ -30,7 +30,10 @@
     "bump-versions": "tsx ./lib/bump-versions.ts"
   },
   "browserslist": [],
-  "peerDependencies": { "react": ">=18.3.1", "react-dom": ">=18.3.1" },
+  "peerDependencies": {
+    "react": ">=18.3.1",
+    "react-dom": ">=18.3.1"
+  },
   "dependencies": {
     "@sillsdev/scripture": "^2.0.2",
     "platform-bible-utils": "file:../paranext-core/lib/platform-bible-utils"
@@ -91,6 +94,10 @@
     "webpack-merge": "^6.0.1",
     "zip-folder-promise": "^1.2.0"
   },
-  "workspaces": ["src/*"],
-  "volta": { "node": "20.18.0" }
+  "workspaces": [
+    "src/*"
+  ],
+  "volta": {
+    "node": "20.18.0"
+  }
 }
