@@ -29,5 +29,6 @@ dist-ssr
 
 # Temporary intermediate build files
 temp-build
+assets/sf-pdp
 
 # #endregion

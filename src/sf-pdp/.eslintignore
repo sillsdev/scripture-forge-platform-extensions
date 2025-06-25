@@ -31,6 +31,5 @@ temp-build
 
 # generated files
 package-lock.json
-**/assets/sf-pdp/**
 
 # #endregion

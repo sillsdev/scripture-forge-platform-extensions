@@ -1,6 +1,12 @@
 import papi, { logger } from '@papi/backend';
 import { ExecutionActivationContext, IWebViewProvider } from '@papi/core';
-import { formatReplacementString, isPlatformError, isString } from 'platform-bible-utils';
+import {
+  formatReplacementString,
+  getErrorMessage,
+  isPlatformError,
+  isString,
+} from 'platform-bible-utils';
+import { ChildProcess } from 'child_process';
 import ScriptureForgeAuthenticationProvider, {
   AUTH_PATH,
 } from './auth/scripture-forge-authentication-provider.model';
@@ -11,11 +17,15 @@ import { SERVER_CONFIGURATION_PRESET_NAMES } from './auth/server-configuration.m
 import ScriptureForgeApi from './projects/scripture-forge-api.model';
 import SlingshotProjectDataProviderEngineFactory from './projects/slingshot-project-data-provider-engine-factory.model';
 import { SLINGSHOT_PROJECT_INTERFACES } from './projects/slingshot-project-data-provider-engine.model';
+import { initializeChildProcess } from './projects/child-process-handler';
 
 type IWebViewProviderWithType = IWebViewProvider & { webViewType: string };
 
 const SCRIPTURE_FORGE_HOME_WEB_VIEW_TYPE = 'scriptureForge.home';
 const SCRIPTURE_FORGE_SLINGSHOT_PDPF_ID = 'scriptureForge.slingshotPdpf';
+
+let childProcess: ChildProcess | undefined;
+const realTimeCollaborativeEditingEnabled = process.env.SF_RCE_ENABLED === 'true';
 
 /** Simple web view provider that provides Scripture Forge Home web views when papi requests them */
 const homeWebViewProvider: IWebViewProviderWithType = {
@@ -38,6 +48,9 @@ const homeWebViewProvider: IWebViewProviderWithType = {
 
 export async function activate(context: ExecutionActivationContext) {
   logger.debug('Scripture Forge Extension is activating!');
+
+  if (realTimeCollaborativeEditingEnabled && !context.elevatedPrivileges.createProcess)
+    throw new Error('Scripture Forge extension requires createProcess elevated privilege');
 
   const homeWebViewProviderPromise = papi.webViewProviders.registerWebViewProvider(
     homeWebViewProvider.webViewType,
@@ -156,7 +169,9 @@ export async function activate(context: ExecutionActivationContext) {
     'scriptureForge.serverConfiguration',
     (newServerConfiguration) => {
       if (isPlatformError(newServerConfiguration)) {
-        logger.warn(`Error on getting new SF server configuration: ${newServerConfiguration}`);
+        logger.warn(
+          `Error on getting new SF server configuration: ${getErrorMessage(newServerConfiguration)}`,
+        );
         return;
       }
 
@@ -224,6 +239,16 @@ export async function activate(context: ExecutionActivationContext) {
       });
     },
   );
+
+  if (realTimeCollaborativeEditingEnabled) {
+    // Verified createProcess exists earlier
+    childProcess = context.elevatedPrivileges.createProcess!.fork(
+      context.executionToken,
+      'assets/sf-pdp/index.js',
+    );
+
+    initializeChildProcess(childProcess, authenticationProvider, scriptureForgeApi);
+  }
 
   // Await registration promises at the end so we don't hold everything else up
   context.registrations.add(

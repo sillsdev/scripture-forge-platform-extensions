@@ -1,0 +1,19 @@
+{
+  "name": "sf-pdp-messages",
+  "private": true,
+  "version": "0.3.0-alpha.0",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "author": "SIL",
+  "license": "MIT",
+  "scripts": {
+    "build": "npm run build:types && npm run build:functions",
+    "build:functions": "npx esbuild index.ts --bundle --minify --platform=node --outfile=dist/index.js",
+    "build:production": "cross-env NODE_ENV=production npm run build",
+    "build:types": "tsc --emitDeclarationOnly"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.6",
+    "typescript": "^5.8.3"
+  }
+}
