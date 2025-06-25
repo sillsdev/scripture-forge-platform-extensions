@@ -5,6 +5,7 @@ import {
 } from '@papi/core';
 import { logger } from '@papi/backend';
 import { Dispose, getErrorMessage, Mutex, PlatformEvent, Unsubscriber } from 'platform-bible-utils';
+import { StatusCodes } from 'http-status-codes';
 import SlingshotProjectDataProviderEngine, {
   SLINGSHOT_PROJECT_INTERFACES,
 } from './slingshot-project-data-provider-engine.model';
@@ -119,9 +120,10 @@ export default class SlingshotProjectDataProviderEngineFactory
       }
 
       if (typeof projectsInfo === 'number') {
-        logger.warn(
-          `Slingshot PDPEF received error while getting available projects: ${projectsInfo}`,
-        );
+        if (projectsInfo !== StatusCodes.NO_CONTENT)
+          logger.warn(
+            `Slingshot PDPEF received error while getting available projects: ${projectsInfo}`,
+          );
         return [];
       }
 

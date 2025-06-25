@@ -74,6 +74,9 @@ export const AUTH_PATH = '/callback/auth0';
 /** Error message thrown when not logged in when trying to get access token */
 export const NOT_LOGGED_IN_ERROR_MESSAGE = 'Not logged in';
 
+/** Special redirect URI for development mode when our custom protocol can't be registered. */
+export const DEV_REDIRECT_URI = `http://localhost:5000${AUTH_PATH}`;
+
 /** Necessary auth scopes for accessing Slingshot drafts */
 const SCOPES = ['openid', 'profile', 'email', 'sf_data', 'offline_access'].join(' ');
 /** Auth audience for Scripture Forge...? */
@@ -164,6 +167,11 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
   /** Whether we have retrieved the tokens from storage for the first time */
   #hasRetrievedAuthTokensFromStorage = false;
 
+  /** Rate limiting settings for fetch requests */
+  #rateLimitIntervalMs = 1000; // 1 second by default
+  /** Map to store pending requests for the same URL to avoid duplicate fetches */
+  #requestsByUrl = new Map<string, Promise<Response>>();
+
   /**
    * @param redirectUri The full uri including path to which the authentication site will redirect
    *   when finished authenticating. If `undefined`, will not be able to log in
@@ -199,7 +207,37 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
     this.#authTokensMutex.cancel();
     this.#authTokens = undefined;
     this.#hasRetrievedAuthTokensFromStorage = false;
+    this.#requestsByUrl.clear();
     this.emitSessionChangeEvent(undefined);
+  }
+
+  /** Creates a cache key for rate limiting based on URL and relevant request options */
+  static #createRequestCacheKey(url: string, options: RequestInit): string {
+    // Include method and body in the cache key as they affect the response
+    const method = options.method || 'GET';
+    const bodyKey = options.body
+      ? crypto.createHash('md5').update(options.body.toString()).digest('hex').substring(0, 8)
+      : '';
+    return `${method}:${url}${bodyKey ? `:${bodyKey}` : ''}`;
+  }
+
+  /**
+   * Configure the rate limiting interval for fetchWithAuthorization requests
+   *
+   * @param intervalMs Minimum time in milliseconds between requests to the same URL. Default is
+   *   1000ms (1 second)
+   */
+  setRateLimitInterval(intervalMs: number): void {
+    this.#rateLimitIntervalMs = intervalMs;
+  }
+
+  /** Get the appropriate redirect URI for the current environment */
+  getRedirectUri(): string {
+    // Only packaged Electron applications properly register protocol handlers on macOS and Linux
+    // https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app#packaging
+    if (!globalThis.isPackaged) return DEV_REDIRECT_URI;
+    if (!this.redirectUri) throw new Error('OAuth redirect URI is not set');
+    return this.redirectUri;
   }
 
   /**
@@ -243,7 +281,7 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
    */
   async isLoggedIn(): Promise<boolean> {
     try {
-      if (await this.#getAccessToken()) return true;
+      if (await this.getAccessToken()) return true;
     } catch (e) {
       logger.debug(`Error trying to get access token to check if logged in: ${getErrorMessage(e)}`);
     }
@@ -262,8 +300,6 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
    *   was already logged in
    */
   async login(): Promise<boolean> {
-    if (!this.redirectUri) throw new Error('Cannot log in without a redirect uri');
-
     // If already logged in, don't need to log in again
     if (await this.isLoggedIn()) return false;
 
@@ -286,7 +322,7 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
       const authorizeParamsObject: AuthorizeRequestUrlParams = {
         response_type: 'code',
         client_id: this.#serverConfiguration.auth.clientId,
-        redirect_uri: this.redirectUri,
+        redirect_uri: this.getRedirectUri(),
         scope: SCOPES,
         state: this.#authorizeRequestInfo.state,
         prompt: 'login',
@@ -349,7 +385,8 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
   /**
    * Runs [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch) with Scripture
    * Forge authorization. Attempts to refresh the access token if needed. Logs out automatically if
-   * unauthorized.
+   * unauthorized. Includes rate limiting to prevent too many requests to the same URL within a
+   * short time window.
    *
    * Throws if something went wrong with setting up and running the fetch, like no internet, not
    * logged in, or access token is expired and refresh token doesn't work so we don't even have an
@@ -359,118 +396,29 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
     const fullUrl = url.startsWith(this.#serverConfiguration.scriptureForge.domain)
       ? url
       : `${this.#serverConfiguration.scriptureForge.domain}${url.startsWith('/') ? '' : '/'}${url}`;
-    logger.debug(`SF Auth provider fetching with authorization: ${fullUrl}`);
-    const accessToken = await this.#getAccessToken();
-    const fullOptions = {
-      ...options,
-      headers: { ...options.headers, Authorization: `Bearer ${accessToken}` },
-    };
-    const response = await fetch(fullUrl, fullOptions);
-    if (response.ok || response.status !== StatusCodes.UNAUTHORIZED) return response;
 
-    /** Special JSON-based response contents from failed fetch */
-    let error: { error: string };
+    // Create a cache key that includes URL and relevant request options that might affect the response
+    const cacheKey = ScriptureForgeAuthenticationProvider.#createRequestCacheKey(fullUrl, options);
+
+    // Check if there's already a pending request for this exact URL and options
+    const existingRequest = this.#requestsByUrl.get(cacheKey);
+    if (existingRequest) {
+      const response = await existingRequest;
+      return response.clone();
+    }
+
+    // Create and store the promise for this request
+    logger.debug(`SF Auth provider fetching: ${fullUrl}`);
+    const requestPromise = this.#performFetchWithAuthorization(fullUrl, options);
+    this.#requestsByUrl.set(cacheKey, requestPromise);
+
     try {
-      error = await response.json();
-    } catch (e) {
-      logger.debug(
-        `Error parsing ${response.status} ${response.statusText} error response from ${fullUrl}. This probably means it was not a typical OAuth unauthorized error response indicating our access token expired. Logging out and returning the response instead of trying to retrieve a new access token. ${getErrorMessage(e)}`,
-      );
-
-      // Log out since we got unauthorized and not invalid token
-      try {
-        await this.logout(true);
-      } catch (err) {
-        logger.warn(
-          `Failed to log out after ${response.status} ${response.statusText} error response from ${fullUrl}. ${getErrorMessage(err)}`,
-        );
-      }
-
-      return response;
+      const response = await requestPromise;
+      return response.clone();
+    } finally {
+      // Make sure the requests expire after the rate limit interval
+      setTimeout(() => this.#requestsByUrl.delete(cacheKey), this.#rateLimitIntervalMs);
     }
-
-    // If the error is not an invalid access token, log out and return the response
-    if (error.error !== 'invalid_token') {
-      try {
-        await this.logout(true);
-      } catch (err) {
-        logger.warn(
-          `Failed to log out after ${response.status} ${response.statusText} error response that is not invalid_token from ${fullUrl}. ${getErrorMessage(err)}`,
-        );
-      }
-      return response;
-    }
-
-    // Access token is invalid. Try refreshing it and retrying the request
-    logger.debug(
-      `${response.status} ${response.statusText} error from ${fullUrl}: the access token is expired. Will try requesting a new token. Full response: ${JSON.stringify(error)}`,
-    );
-
-    let newAccessToken: string;
-    try {
-      newAccessToken = await this.#authTokensMutex.runExclusive(async () => {
-        if (this.#authTokens) this.#authTokens.didExpire = true;
-        return this.#getAccessToken(false);
-      });
-    } catch (e) {
-      throw new Error(
-        `Error while requesting a new access token while fetching ${fullUrl}. ${getErrorMessage(e)}`,
-      );
-    }
-
-    fullOptions.headers = {
-      ...options.headers,
-      Authorization: `Bearer ${newAccessToken}`,
-    };
-    try {
-      const newResponse = await fetch(fullUrl, fullOptions);
-
-      // For some reason, after getting a new access token, still unauthorized. Log out and return the response
-      if (newResponse.status === StatusCodes.UNAUTHORIZED) {
-        try {
-          await this.logout(true);
-        } catch (err) {
-          logger.warn(
-            `Failed to log out after second ${newResponse.status} ${newResponse.statusText} error response from ${fullUrl} after getting a new access token. ${getErrorMessage(err)}`,
-          );
-        }
-      }
-
-      return newResponse;
-    } catch (e) {
-      throw new Error(
-        `Error while fetching ${fullUrl} after retrieving a new access token. ${getErrorMessage(e)}`,
-      );
-    }
-  }
-
-  async dispose() {
-    this.#authorizeRequestInfo?.authorizationCodeAsyncVar.rejectWithReason(
-      'Login canceled because Scripture Forge authentication provider is disposing',
-    );
-
-    return true;
-  }
-
-  async #setAuthTokens(tokenSet: ResponseTokenSet | undefined): Promise<void> {
-    this.#authTokens = tokenSet
-      ? {
-          accessToken: tokenSet.access_token,
-          refreshToken: tokenSet.refresh_token ?? this.#authTokens?.refreshToken,
-          accessTokenExpireTime: getExpireTimeMs(tokenSet.expires_in),
-        }
-      : undefined;
-    if (this.storageManager) {
-      if (tokenSet) {
-        await this.storageManager.set(
-          getAuthTokensStorageKey(this.serverConfiguration),
-          JSON.stringify(this.#authTokens),
-        );
-      } else {
-        await this.storageManager.delete(getAuthTokensStorageKey(this.serverConfiguration));
-      }
-    }
-    this.emitSessionChangeEvent(undefined);
   }
 
   /**
@@ -478,7 +426,7 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
    * current one expires. Throws if not logged in, access token is expired and refresh token doesn't
    * work, or failed to get access token in some other way
    */
-  async #getAccessToken(shouldAcquireLock = true): Promise<string> {
+  async getAccessToken(shouldAcquireLock = true): Promise<string> {
     const getAccessTokenInternal = async () => {
       if (!this.#authTokens && !this.#hasRetrievedAuthTokensFromStorage) {
         if (this.storageManager) {
@@ -546,6 +494,121 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
     return getAccessTokenInternal();
   }
 
+  async dispose() {
+    this.#authorizeRequestInfo?.authorizationCodeAsyncVar.rejectWithReason(
+      'Login canceled because Scripture Forge authentication provider is disposing',
+    );
+
+    return true;
+  }
+
+  /** Performs the actual fetch with authorization logic, separated from rate limiting logic */
+  async #performFetchWithAuthorization(fullUrl: string, options: RequestInit): Promise<Response> {
+    const accessToken = await this.getAccessToken();
+    const fullOptions = {
+      ...options,
+      headers: { ...options.headers, Authorization: `Bearer ${accessToken}` },
+    };
+    const response = await fetch(fullUrl, fullOptions);
+    if (response.ok || response.status !== StatusCodes.UNAUTHORIZED) return response;
+
+    /** Special JSON-based response contents from failed fetch */
+    let error: { error: string };
+    try {
+      error = await response.clone().json();
+    } catch (e) {
+      logger.debug(
+        `Error parsing ${response.status} ${response.statusText} error response from ${fullUrl}. This probably means it was not a typical OAuth unauthorized error response indicating our access token expired. Logging out and returning the response instead of trying to retrieve a new access token. ${getErrorMessage(e)}`,
+      );
+
+      // Log out since we got unauthorized and not invalid token
+      try {
+        await this.logout(true);
+      } catch (err) {
+        logger.warn(
+          `Failed to log out after ${response.status} ${response.statusText} error response from ${fullUrl}. ${getErrorMessage(err)}`,
+        );
+      }
+
+      return response;
+    }
+
+    // If the error is not an invalid access token, log out and return the response
+    if (error.error !== 'invalid_token') {
+      try {
+        await this.logout(true);
+      } catch (err) {
+        logger.warn(
+          `Failed to log out after ${response.status} ${response.statusText} error response that is not invalid_token from ${fullUrl}. ${getErrorMessage(err)}`,
+        );
+      }
+      return response;
+    }
+
+    // Access token is invalid. Try refreshing it and retrying the request
+    logger.debug(
+      `${response.status} ${response.statusText} error from ${fullUrl}: the access token is expired. Will try requesting a new token. Full response: ${JSON.stringify(error)}`,
+    );
+
+    let newAccessToken: string;
+    try {
+      newAccessToken = await this.#authTokensMutex.runExclusive(async () => {
+        if (this.#authTokens) this.#authTokens.didExpire = true;
+        return this.getAccessToken(false);
+      });
+    } catch (e) {
+      throw new Error(
+        `Error while requesting a new access token while fetching ${fullUrl}. ${getErrorMessage(e)}`,
+      );
+    }
+
+    fullOptions.headers = {
+      ...options.headers,
+      Authorization: `Bearer ${newAccessToken}`,
+    };
+    try {
+      const newResponse = await fetch(fullUrl, fullOptions);
+
+      // For some reason, after getting a new access token, still unauthorized. Log out and return the response
+      if (newResponse.status === StatusCodes.UNAUTHORIZED) {
+        try {
+          await this.logout(true);
+        } catch (err) {
+          logger.warn(
+            `Failed to log out after second ${newResponse.status} ${newResponse.statusText} error response from ${fullUrl} after getting a new access token. ${getErrorMessage(err)}`,
+          );
+        }
+      }
+
+      return newResponse;
+    } catch (e) {
+      throw new Error(
+        `Error while fetching ${fullUrl} after retrieving a new access token. ${getErrorMessage(e)}`,
+      );
+    }
+  }
+
+  async #setAuthTokens(tokenSet: ResponseTokenSet | undefined): Promise<void> {
+    this.#authTokens = tokenSet
+      ? {
+          accessToken: tokenSet.access_token,
+          refreshToken: tokenSet.refresh_token ?? this.#authTokens?.refreshToken,
+          accessTokenExpireTime: getExpireTimeMs(tokenSet.expires_in),
+        }
+      : undefined;
+    if (this.storageManager) {
+      if (tokenSet) {
+        await this.storageManager.set(
+          getAuthTokensStorageKey(this.serverConfiguration),
+          JSON.stringify(this.#authTokens),
+        );
+      } else {
+        await this.storageManager.delete(getAuthTokensStorageKey(this.serverConfiguration));
+      }
+    }
+    this.emitSessionChangeEvent(undefined);
+  }
+
   // #region OAuth requests
   // TODO: consider factoring out into another file after seeing how the error handling integrates
 
@@ -558,14 +621,12 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
   async #requestAccessTokenUsingAuthorizationCode(
     authorizationCode: string,
   ): Promise<AuthorizationCodeTokenResponse> {
-    if (!this.redirectUri)
-      throw new Error('Cannot request authorization code grant without a redirect uri');
     if (!this.#authorizeRequestInfo) throw new Error('Authorization request info missing');
 
     const authorizationCodeTokenRequestParamsObject: AuthorizationCodeTokenRequestBody = {
       grant_type: 'authorization_code',
       client_id: this.#serverConfiguration.auth.clientId,
-      redirect_uri: this.redirectUri,
+      redirect_uri: this.getRedirectUri(),
       code: authorizationCode,
       code_verifier: this.#authorizeRequestInfo.codeVerifier,
     };
