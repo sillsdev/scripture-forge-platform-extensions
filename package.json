@@ -36,15 +36,23 @@
   },
   "dependencies": {
     "@sillsdev/scripture": "^2.0.2",
-    "platform-bible-utils": "file:../paranext-core/lib/platform-bible-utils"
+    "partysocket": "^1.1.4",
+    "platform-bible-utils": "file:../paranext-core/lib/platform-bible-utils",
+    "quill-delta": "^5.1.0",
+    "rich-text": "^4.1.0",
+    "sharedb": "^5.2.2",
+    "util": "^0.12.5",
+    "ws": "^8.18.2"
   },
   "devDependencies": {
     "@swc/core": "1.10.18",
     "@tailwindcss/typography": "^0.5.16",
-    "@types/node": "^20.16.11",
+    "@types/node": "^22.15.34",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
+    "@types/sharedb": "^5.1.0",
     "@types/webpack": "^5.28.5",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.20",
@@ -88,7 +96,7 @@
     "tsconfig-paths": "^4.2.0",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.4.5",
+    "typescript": "^5.8.3",
     "webpack": "^5.97.1",
     "webpack-cli": "^5.1.4",
     "webpack-merge": "^6.0.1",
@@ -96,6 +104,6 @@
   },
   "workspaces": ["src/*"],
   "volta": {
-    "node": "20.18.0"
+    "node": "22.16.0"
   }
 }
