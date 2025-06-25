@@ -1,6 +1,11 @@
 import papi, { logger } from '@papi/backend';
 import { ExecutionActivationContext, IWebViewProvider } from '@papi/core';
-import { formatReplacementString, isString } from 'platform-bible-utils';
+import {
+  formatReplacementString,
+  getErrorMessage,
+  isPlatformError,
+  isString,
+} from 'platform-bible-utils';
 import ScriptureForgeAuthenticationProvider, {
   AUTH_PATH,
 } from './auth/scripture-forge-authentication-provider.model';
@@ -11,11 +16,14 @@ import { SERVER_CONFIGURATION_PRESET_NAMES } from './auth/server-configuration.m
 import ScriptureForgeApi from './projects/scripture-forge-api.model';
 import SlingshotProjectDataProviderEngineFactory from './projects/slingshot-project-data-provider-engine-factory.model';
 import { SLINGSHOT_PROJECT_INTERFACES } from './projects/slingshot-project-data-provider-engine.model';
+import ScriptureForgeProjectDataProviderEngineFactory from './projects/scripture-forge-project-data-provider-engine-factory.model';
+import { SCRIPTURE_FORGE_PROJECT_INTERFACES } from './projects/scripture-forge-project-data-provider-engine.model';
 
 type IWebViewProviderWithType = IWebViewProvider & { webViewType: string };
 
 const SCRIPTURE_FORGE_HOME_WEB_VIEW_TYPE = 'scriptureForge.home';
 const SCRIPTURE_FORGE_SLINGSHOT_PDPF_ID = 'scriptureForge.slingshotPdpf';
+const SCRIPTURE_FORGE_PDPF_ID = 'scriptureForge.pdpf';
 
 /** Simple web view provider that provides Scripture Forge Home web views when papi requests them */
 const homeWebViewProvider: IWebViewProviderWithType = {
@@ -155,7 +163,9 @@ export async function activate(context: ExecutionActivationContext) {
   const updateServerConfigurationSubscriptionPromise = papi.settings.subscribe(
     'scriptureForge.serverConfiguration',
     (newServerConfiguration) => {
-      authenticationProvider.serverConfiguration = newServerConfiguration;
+      if (isPlatformError(newServerConfiguration))
+        logger.warn(`Invalid SF server configuration: ${getErrorMessage(newServerConfiguration)}`);
+      else authenticationProvider.serverConfiguration = newServerConfiguration;
     },
     { retrieveDataImmediately: false },
   );
@@ -208,6 +218,16 @@ export async function activate(context: ExecutionActivationContext) {
 
   // #endregion
 
+  logger.warn('REGISTERING SF PDP');
+  const scriptureForgePdpef = new ScriptureForgeProjectDataProviderEngineFactory();
+  logger.warn('REGISTERING SF PDP 2');
+  const sfPdpefPromise = papi.projectDataProviders.registerProjectDataProviderEngineFactory(
+    SCRIPTURE_FORGE_PDPF_ID,
+    SCRIPTURE_FORGE_PROJECT_INTERFACES,
+    scriptureForgePdpef,
+  );
+  logger.warn('REGISTERING SF PDP 3');
+
   const openAutoDraftsCommandPromise = papi.commands.registerCommand(
     'scriptureForge.openAutoDrafts',
     async () => {
@@ -226,8 +246,28 @@ export async function activate(context: ExecutionActivationContext) {
     await logoutCommandPromise,
     await isLoggedInCommandPromise,
     await slingshotPdpefPromise,
+    await sfPdpefPromise,
     await openAutoDraftsCommandPromise,
   );
+
+  (async () => {
+    try {
+      logger.warn('GETTING SF PDP');
+      const sfPdp = await papi.projectDataProviders.get(
+        'scriptureForge.project',
+        '<INSERT HARD CODED PROJECT ID FOR NOW>',
+      );
+      logger.warn('GETTING SF PDP OPS');
+      const ops = await sfPdp.getChapterDeltaOperations({
+        book: 'MAT',
+        chapterNum: 1,
+        verseNum: 1,
+      });
+      logger.info(`SF PDP OPS: ${JSON.stringify(ops)}`);
+    } catch (err) {
+      logger.info(`SF PDP ERROR: ${getErrorMessage(err)}`);
+    }
+  })();
 
   // #region first startup actions - disabled for now since this extension is bundled into the app
   // TODO: un-comment this when the extension is not bundled but rather installed from the marketplace

@@ -42,6 +42,7 @@ const configMain: webpack.Configuration = merge(configBase, {
       // Get web view files from the temp dir where they are built
       new WebViewResolveWebpackPlugin(),
     ],
+    fallback: { util: require.resolve('util') },
   },
 
   // #endregion

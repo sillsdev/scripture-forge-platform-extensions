@@ -1,4 +1,6 @@
 declare module 'scripture-forge' {
+  import { SerializedVerseRef } from '@sillsdev/scripture';
+  import { Op } from 'quill-delta';
   import {
     DataProviderDataType,
     DataProviderSubscriberOptions,
@@ -165,10 +167,225 @@ declare module 'scripture-forge' {
         options?: DataProviderSubscriberOptions,
       ): Promise<UnsubscriberAsync>;
     };
+
+  export type DeltaOperation = Op;
+
+  export type ScriptureForgeProjectInterfaceDataTypes = {
+    ChapterDeltaOperations: DataProviderDataType<
+      SerializedVerseRef,
+      DeltaOperation[],
+      DeltaOperation[]
+    >;
+    Project: DataProviderDataType<undefined, ScriptureForgeProjectDocument, never>;
+  };
+
+  export type IScriptureForgeProjectDataProvider =
+    IProjectDataProvider<ScriptureForgeProjectInterfaceDataTypes>;
+
+  // #region Project Document Types
+
+  /**
+   * Information about a Scripture Forge project, including its configuration and permissions.
+   *
+   * Largely a copy of "SFProject" in "sf-project.ts" in the web-xforge repo.
+   */
+  export type ScriptureForgeProjectDocument = {
+    name: string;
+    rolePermissions: { [role: string]: string[] };
+    userRoles: { [userRef: string]: string };
+    userPermissions: { [userRef: string]: string[] };
+    /** Whether the project has its capability to synchronize project data turned off. */
+    syncDisabled?: boolean;
+    paratextId: string;
+    shortName: string;
+    writingSystem: WritingSystem;
+    isRightToLeft?: boolean;
+    translateConfig: TranslateConfig;
+    checkingConfig: CheckingConfig;
+    resourceConfig?: ResourceConfig;
+    texts: TextInfo[];
+    noteTags?: NoteTag[];
+    sync: Sync;
+    editable: boolean;
+    defaultFontSize?: number;
+    defaultFont?: string;
+    maxGeneratedUsersPerShareKey?: number;
+    biblicalTermsConfig: BiblicalTermsConfig;
+    copyrightBanner?: string;
+    copyrightNotice?: string;
+    paratextUsers: ParatextUserProfile[];
+  };
+
+  export type BaseProject = {
+    paratextId: string;
+    shortName: string;
+  };
+
+  export type BiblicalTermsConfig = {
+    biblicalTermsEnabled: boolean;
+    errorMessage?: string;
+    hasRenderings: boolean;
+  };
+
+  export type Chapter = {
+    number: number;
+    lastVerse: number;
+    isValid: boolean;
+    permissions: { [userRef: string]: string };
+    hasAudio?: boolean;
+    hasDraft?: boolean;
+    draftApplied?: boolean;
+  };
+
+  export enum CheckingAnswerExport {
+    All = 'all',
+    MarkedForExport = 'marked_for_export',
+    None = 'none',
+  }
+
+  export type CheckingConfig = {
+    checkingEnabled: boolean;
+    usersSeeEachOthersResponses: boolean;
+    answerExportMethod: CheckingAnswerExport;
+    noteTagId?: number;
+    hideCommunityCheckingText?: boolean;
+  };
+
+  export type DraftConfig = {
+    additionalTrainingData: boolean;
+    additionalTrainingSourceEnabled: boolean;
+    additionalTrainingSource?: TranslateSource;
+    alternateSourceEnabled: boolean;
+    alternateSource?: TranslateSource;
+    alternateTrainingSourceEnabled: boolean;
+    alternateTrainingSource?: TranslateSource;
+    lastSelectedTrainingBooks: number[];
+    lastSelectedTrainingDataFiles: string[];
+    lastSelectedTrainingScriptureRange?: string;
+    lastSelectedTrainingScriptureRanges?: ProjectScriptureRange[];
+    lastSelectedTranslationBooks: number[];
+    lastSelectedTranslationScriptureRange?: string;
+    lastSelectedTranslationScriptureRanges?: ProjectScriptureRange[];
+    servalConfig?: string;
+    usfmConfig?: DraftUsfmConfig;
+  };
+
+  export type DraftUsfmConfig = {
+    paragraphFormat: ParagraphBreakFormat;
+  };
+
+  export type NoteTag = {
+    tagId: number;
+    name: string;
+    icon: string;
+    creatorResolve: boolean;
+  };
+
+  export enum ParagraphBreakFormat {
+    BestGuess = 'best_guess',
+    Remove = 'remove',
+    MoveToEnd = 'move_to_end',
+  }
+
+  export type ParatextUserProfile = {
+    username: string;
+    opaqueUserId: string;
+    sfUserId?: string;
+  };
+
+  /** A per-project scripture range. */
+  export type ProjectScriptureRange = {
+    projectId: string;
+    scriptureRange: string;
+  };
+
+  export enum ProjectType {
+    Standard = 'Standard',
+    Resource = 'Resource',
+    BackTranslation = 'BackTranslation',
+    Daughter = 'Daughter',
+    Transliteration = 'Transliteration',
+    TransliterationManual = 'TransliterationManual',
+    TransliterationWithEncoder = 'TransliterationWithEncoder',
+    StudyBible = 'StudyBible',
+    ConsultantNotes = 'ConsultantNotes',
+    GlobalConsultantNotes = 'GlobalConsultantNotes',
+    GlobalAnthropologyNotes = 'GlobalAnthropologyNotes',
+    StudyBibleAdditions = 'StudyBibleAdditions',
+    Auxiliary = 'Auxiliary',
+    AuxiliaryResource = 'AuxiliaryResource',
+    MarbleResource = 'MarbleResource',
+    Xml = 'Xml',
+    XmlResource = 'XmlResource',
+    XmlDictionary = 'XmlDictionary',
+    SourceLanguage = 'SourceLanguage',
+    Dictionary = 'Dictionary',
+    EnhancedResource = 'EnhancedResource',
+  }
+
+  export type ResourceConfig = {
+    createdTimestamp: Date;
+    manifestChecksum: string;
+    permissionsChecksum: string;
+    revision: number;
+  };
+
+  export type Sync = {
+    queuedCount: number;
+    lastSyncSuccessful?: boolean;
+    dateLastSuccessfulSync?: string;
+    syncedToRepositoryVersion?: string;
+    /**
+     * Indicates if PT project data from the last send/receive operation was incorporated into the
+     * SF project docs
+     */
+    dataInSync?: boolean;
+    lastSyncErrorCode?: number;
+  };
+
+  export type TextInfo = {
+    bookNum: number;
+    hasSource: boolean;
+    chapters: Chapter[];
+    permissions: { [userRef: string]: string };
+  };
+
+  export type TranslateConfig = {
+    translationSuggestionsEnabled: boolean;
+    source?: TranslateSource;
+    defaultNoteTagId?: number;
+    preTranslate: boolean;
+    draftConfig: DraftConfig;
+    projectType?: ProjectType;
+    baseProject?: BaseProject;
+  };
+
+  export enum TranslateShareLevel {
+    Anyone = 'anyone',
+    Specific = 'specific',
+  }
+
+  export type TranslateSource = {
+    paratextId: string;
+    projectRef: string;
+    name: string;
+    shortName: string;
+    writingSystem: WritingSystem;
+    isRightToLeft?: boolean;
+  };
+
+  export type WritingSystem = {
+    script?: string;
+    region?: string;
+    tag: string;
+  };
+
+  // #endregion
 }
 
 declare module 'papi-shared-types' {
   import {
+    IScriptureForgeProjectDataProvider,
     ISlingshotDraftInfoProjectDataProvider,
     ServerConfiguration,
     ServerConfigurationPresetNames,
@@ -227,6 +444,7 @@ declare module 'papi-shared-types' {
   }
 
   export interface ProjectDataProviderInterfaces {
+    'scriptureForge.project': IScriptureForgeProjectDataProvider;
     'scriptureForge.slingshotDraftInfo': ISlingshotDraftInfoProjectDataProvider;
   }
 }
