@@ -4,11 +4,12 @@ import {
   ProjectMetadataWithoutFactoryInfo,
 } from '@papi/core';
 import { logger } from '@papi/backend';
-import { getErrorMessage, Mutex } from 'platform-bible-utils';
+import { Dispose, getErrorMessage, Mutex, PlatformEvent, Unsubscriber } from 'platform-bible-utils';
 import SlingshotProjectDataProviderEngine, {
   SLINGSHOT_PROJECT_INTERFACES,
 } from './slingshot-project-data-provider-engine.model';
 import ScriptureForgeApi, { ScriptureForgeProjectInfo } from './scripture-forge-api.model';
+import { NOT_LOGGED_IN_ERROR_MESSAGE } from '../auth/scripture-forge-authentication-provider.model';
 
 /**
  * Duration in milliseconds to throttle the `getProjects` API call. We will return the previous
@@ -30,7 +31,7 @@ function getSlingshotAppProjectId(projectId: string): string {
 }
 
 export default class SlingshotProjectDataProviderEngineFactory
-  implements IProjectDataProviderEngineFactory<typeof SLINGSHOT_PROJECT_INTERFACES>
+  implements IProjectDataProviderEngineFactory<typeof SLINGSHOT_PROJECT_INTERFACES>, Dispose
 {
   private projectInfoByAppProjectId = new Map<string, ScriptureForgeProjectInfo>();
   private pdpeByAppProjectId = new Map<string, SlingshotProjectDataProviderEngine>();
@@ -38,8 +39,21 @@ export default class SlingshotProjectDataProviderEngineFactory
   private lastGetProjectsTime: number = 0;
   private lastAvailableProjects: ProjectMetadataWithoutFactoryInfo[] = [];
   private getProjectsMutex = new Mutex();
+  /**
+   * If we know we are logged out and therefore shouldn't try to check for projects. If this is
+   * `false`, it doesn't mean we are logged in but that we need to try getting projects again
+   */
+  private isLoggedOut = false;
+  private onDidSessionChangeUnsubscriber: Unsubscriber;
 
-  constructor(private scriptureForgeApi: ScriptureForgeApi) {}
+  constructor(
+    private scriptureForgeApi: ScriptureForgeApi,
+    onDidSessionChange: PlatformEvent<undefined>,
+  ) {
+    this.onDidSessionChangeUnsubscriber = onDidSessionChange(() => {
+      this.isLoggedOut = false;
+    });
+  }
 
   async getAvailableProjects(): Promise<ProjectMetadataWithoutFactoryInfo[]> {
     return this.#getAvailableProjects();
@@ -64,6 +78,10 @@ export default class SlingshotProjectDataProviderEngineFactory
     return pdpe;
   }
 
+  async dispose(): Promise<boolean> {
+    return this.onDidSessionChangeUnsubscriber();
+  }
+
   /**
    * Gets available projects from cache or reaches out to get new project info
    *
@@ -71,6 +89,9 @@ export default class SlingshotProjectDataProviderEngineFactory
    */
   async #getAvailableProjects(force = false) {
     if (force) this.lastGetProjectsTime = 0;
+    // If we're not forcing and we know we're logged out, return empty array instead of failing
+    // again because we know we're already logged out
+    else if (this.isLoggedOut) return [];
 
     if (Date.now() - this.lastGetProjectsTime < GET_PROJECTS_THROTTLE_MS)
       return this.lastAvailableProjects;
@@ -86,9 +107,14 @@ export default class SlingshotProjectDataProviderEngineFactory
       try {
         projectsInfo = await this.scriptureForgeApi.getProjects();
       } catch (e) {
+        const errorMessage = getErrorMessage(e);
         logger.warn(
-          `Slingshot PDPEF caught Scripture Forge API error while getting available projects. ${getErrorMessage(e)}`,
+          `Slingshot PDPEF caught Scripture Forge API error while getting available projects. ${errorMessage}`,
         );
+
+        // Keep track if we're logged out so we don't keep spamming the logs
+        if (errorMessage === NOT_LOGGED_IN_ERROR_MESSAGE) this.isLoggedOut = true;
+
         return [];
       }
 

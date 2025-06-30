@@ -71,6 +71,9 @@ type RevokeRefreshTokenRequestBody = {
 /** Path on extension redirect URL for picking up auth response */
 export const AUTH_PATH = '/callback/auth0';
 
+/** Error message thrown when not logged in when trying to get access token */
+export const NOT_LOGGED_IN_ERROR_MESSAGE = 'Not logged in';
+
 /** Necessary auth scopes for accessing Slingshot drafts */
 const SCOPES = ['openid', 'profile', 'email', 'sf_data', 'offline_access'].join(' ');
 /** Auth audience for Scripture Forge...? */
@@ -492,7 +495,7 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
         }
         this.#hasRetrievedAuthTokensFromStorage = true;
       }
-      if (!this.#authTokens) throw new Error('Not logged in');
+      if (!this.#authTokens) throw new Error(NOT_LOGGED_IN_ERROR_MESSAGE);
 
       if (!this.#authTokens.didExpire && this.#authTokens.accessTokenExpireTime > Date.now())
         return this.#authTokens.accessToken;
