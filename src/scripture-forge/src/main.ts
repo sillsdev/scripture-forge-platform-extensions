@@ -193,7 +193,13 @@ export async function activate(context: ExecutionActivationContext) {
   // const scriptureForgeApi = new ScriptureForgeSampleApi(authenticationProvider);
   const scriptureForgeApi = new ScriptureForgeApi(authenticationProvider);
 
-  const slingshotPdpef = new SlingshotProjectDataProviderEngineFactory(scriptureForgeApi);
+  const slingshotPdpef = new SlingshotProjectDataProviderEngineFactory(
+    scriptureForgeApi,
+    sessionChangeEmitter.event,
+  );
+
+  context.registrations.add(slingshotPdpef);
+
   const slingshotPdpefPromise = papi.projectDataProviders.registerProjectDataProviderEngineFactory(
     SCRIPTURE_FORGE_SLINGSHOT_PDPF_ID,
     SLINGSHOT_PROJECT_INTERFACES,
