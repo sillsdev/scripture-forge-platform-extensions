@@ -15,7 +15,12 @@ export default class ScriptureForgeProjectDataProviderEngineFactory
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   async getAvailableProjects(): Promise<ProjectMetadataWithoutFactoryInfo[]> {
     // TODO: Retrieve real project IDs here
-    return [{ projectInterfaces: SCRIPTURE_FORGE_PROJECT_INTERFACES, id: '' }];
+    return [
+      {
+        projectInterfaces: SCRIPTURE_FORGE_PROJECT_INTERFACES,
+        id: '<INSERT HARD CODED PROJECT ID FOR NOW>',
+      },
+    ];
   }
 
   async createProjectDataProviderEngine(

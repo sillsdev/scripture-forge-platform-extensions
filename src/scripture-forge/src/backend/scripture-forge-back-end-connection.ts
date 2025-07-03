@@ -1,7 +1,7 @@
 import RichText from 'rich-text';
-import { SerializedVerseRef } from '@sillsdev/scripture';
+import { Canon, SerializedVerseRef } from '@sillsdev/scripture';
 import { logger } from '@papi/backend';
-import { ScriptureForgeProjectDocument } from 'scripture-forge';
+import { Chapter, ScriptureForgeProjectDocument, TextInfo } from 'scripture-forge';
 import { AsyncVariable, getErrorMessage } from 'platform-bible-utils';
 import {
   Connection,
@@ -46,23 +46,23 @@ async function connect(accessToken: string): Promise<void> {
   );
 
   socket.onopen = () => {
-    logger.debug('RCE stream with SF opened');
+    logger.debug('RCE stream with SF PDP opened');
     // eslint-disable-next-line no-type-assertion/no-type-assertion
     connectionAsyncVariable?.resolveToValue(new Connection(socket as Socket));
   };
 
   socket.onclose = () => {
-    logger.debug('RCE stream with SF closed');
+    logger.debug('RCE stream with SF PDP closed');
   };
 
   socket.onerror = (event) => {
-    const errorMsg = `Error occurred in RCE stream with SF: ${event.message}`;
+    const errorMsg = `Error occurred in RCE stream with SF PDP: ${event.message}`;
     logger.error(errorMsg);
     connectionAsyncVariable?.rejectWithReason(errorMsg);
   };
 
   socket.onmessage = (event) => {
-    logger.verbose(`RCE stream with SF received message: ${JSON.stringify(event.data)}`);
+    logger.verbose(`RCE stream with SF PDP received message: ${JSON.stringify(event.data)}`);
   };
 
   return connectionAsyncVariable.promise.then(() => undefined);
@@ -86,7 +86,7 @@ async function disconnect(): Promise<void> {
         const connection = await connectionAsyncVariable.promise;
         connection.close();
       } catch (err) {
-        logger.info(`Error while closing connection with SF: ${getErrorMessage(err)}`);
+        logger.info(`Error while closing connection with SF PDP: ${getErrorMessage(err)}`);
       }
     }
   }
@@ -110,7 +110,17 @@ async function getProjectDoc(
   if (!connectionAsyncVariable) throw new Error('Must call connect() before calling this function');
 
   const connection = await connectionAsyncVariable.promise;
+  const docSubscriptionAsyncVar = new AsyncVariable<void>(`SF PDP project ${projectId}`, 30000);
   const newDoc = connection.get(SCRIPTURE_FORGE_PROJECTS_DOCUMENT, projectId);
+  newDoc.subscribe((error) => {
+    if (error) {
+      const errorMsg = `SF PDP error subscribing to project: ${getErrorMessage(error)}`;
+      logger.error(errorMsg);
+      docSubscriptionAsyncVar.rejectWithReason(errorMsg);
+    } else docSubscriptionAsyncVar.resolveToValue();
+  });
+  newDoc.fetch();
+  await docSubscriptionAsyncVar.promise;
   projectDocuments.set(projectId, newDoc);
   return newDoc;
 }
@@ -125,8 +135,32 @@ async function getChapterDoc(
 
   if (!connectionAsyncVariable) throw new Error('Must call connect() before calling this function');
 
+  const project = await getProjectDoc(projectId);
+  if (
+    !project.data.texts.find((textInfo: TextInfo) => {
+      return (
+        Canon.bookNumberToId(textInfo.bookNum) === serializedVerseRef.book &&
+        textInfo.chapters.find((chapter: Chapter) => {
+          return chapter.number === serializedVerseRef.chapterNum && chapter.isValid;
+        })
+      );
+    })
+  ) {
+    throw new Error(`Verse ref ${serializedVerseRef} not found in project ${projectId}`);
+  } else logger.warn(`Found chapter in SF PDP project: ${JSON.stringify(serializedVerseRef)}`);
+
   const connection = await connectionAsyncVariable.promise;
+  const docSubscriptionAsyncVar = new AsyncVariable<void>(`SF PDP text ${textId}`, 30000);
   const newDoc = connection.get(SCRIPTURE_FORGE_CHAPTER_DOCUMENT, textId);
+  newDoc.subscribe((error) => {
+    if (error) {
+      const errorMsg = `SF PDP error subscribing to document: ${getErrorMessage(error)}`;
+      logger.error(errorMsg);
+      docSubscriptionAsyncVar.rejectWithReason(errorMsg);
+    } else docSubscriptionAsyncVar.resolveToValue();
+  });
+  newDoc.fetch();
+  await docSubscriptionAsyncVar.promise;
   chapterDeltas.set(textId, newDoc);
   return newDoc;
 }

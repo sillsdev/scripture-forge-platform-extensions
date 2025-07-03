@@ -1,5 +1,5 @@
 import { SerializedVerseRef } from '@sillsdev/scripture';
-import { BaseProjectDataProviderEngine } from '@papi/backend';
+import { BaseProjectDataProviderEngine, logger } from '@papi/backend';
 import {
   DataProviderUpdateInstructions,
   IBaseProjectDataProviderEngine,
@@ -31,7 +31,7 @@ export default class ScriptureForgeProjectDataProviderEngine
   extends BaseProjectDataProviderEngine<typeof SCRIPTURE_FORGE_PROJECT_INTERFACES>
   implements IBaseProjectDataProviderEngine<typeof SCRIPTURE_FORGE_PROJECT_INTERFACES>
 {
-  #accessToken: string = '';
+  #accessToken: string = '<INSERT HARD CODED TOKEN FOR NOW>';
 
   /**
    * @param scriptureForgeApi Object to use to get project and draft info
@@ -63,8 +63,10 @@ export default class ScriptureForgeProjectDataProviderEngine
 
   async getChapterDeltaOperations(verseRef: SerializedVerseRef): Promise<DeltaOperation[]> {
     await ScriptureForgeBackEndConnection.connect(this.#accessToken);
-    return (await ScriptureForgeBackEndConnection.getChapterDoc(this.appProjectId, verseRef)).data
-      .ops;
+    logger.info(`SF PDP connected`);
+    const doc = await ScriptureForgeBackEndConnection.getChapterDoc(this.appProjectId, verseRef);
+    logger.info(`SF PDP delta doc: ${JSON.stringify(doc.data)}`);
+    return doc.data.ops;
   }
 
   async setChapterDeltaOperations(

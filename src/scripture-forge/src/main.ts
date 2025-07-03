@@ -260,7 +260,7 @@ export async function activate(context: ExecutionActivationContext) {
       logger.warn('GETTING SF PDP OPS');
       const ops = await sfPdp.getChapterDeltaOperations({
         book: 'MAT',
-        chapterNum: 1,
+        chapterNum: 8,
         verseNum: 1,
       });
       logger.info(`SF PDP OPS: ${JSON.stringify(ops)}`);
