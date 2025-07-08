@@ -1,4 +1,4 @@
-# #region shared with https://github.com/paranext/paranext-multi-extension-template/blob/main/.eslintignore
+# #region shared with https://github.com/paranext/paranext-extension-template/blob/main/.eslintignore
 
 # Please keep this file in sync with .prettierignore and .stylelintignore
 
@@ -31,6 +31,5 @@ temp-build
 
 # generated files
 package-lock.json
-assets/sf-pdp
 
 # #endregion

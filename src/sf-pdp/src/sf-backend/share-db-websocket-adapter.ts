@@ -1,5 +1,5 @@
 import { WebSocket } from 'partysocket';
-import { hasStringProperty, isMessageSendingOp, tryParseJSON } from '../utils';
+import { hasStringProperty, isMessageSendingOp, tryParseJSON } from './utils';
 
 export type ScriptureForgeWebSocketMessage = string | ArrayBuffer | Blob | ArrayBufferView;
 

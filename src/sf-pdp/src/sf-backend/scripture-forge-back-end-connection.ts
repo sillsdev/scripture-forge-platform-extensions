@@ -1,6 +1,5 @@
 import RichText from 'rich-text';
 import { Canon, SerializedVerseRef } from '@sillsdev/scripture';
-import { logger } from '@papi/backend';
 import { Chapter, ScriptureForgeProjectDocument, TextInfo } from 'scripture-forge';
 import { AsyncVariable, getErrorMessage } from 'platform-bible-utils';
 import {
@@ -16,6 +15,7 @@ import {
 } from './rce-utils';
 import { ShareDBWebsocketAdapter } from './share-db-websocket-adapter';
 import { CustomOriginWebSocket } from './custom-origin-websocket';
+import * as logger from '../log';
 
 // Timeout for connecting and retrieving documents
 const SF_TIMEOUT_MS = 60000;
