@@ -35,7 +35,8 @@
   },
   "dependencies": {
     "@sillsdev/scripture": "^2.0.2",
-    "platform-bible-utils": "file:../../../paranext-core/lib/platform-bible-utils"
+    "platform-bible-utils": "file:../../../paranext-core/lib/platform-bible-utils",
+    "sf-pdp-messages": "file:../messages"
   },
   "devDependencies": {
     "@biblionexus-foundation/scripture-utilities": "~0.0.7",

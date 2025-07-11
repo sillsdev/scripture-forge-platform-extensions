@@ -6,22 +6,26 @@ import { PongMessage } from './pong-message';
 import { RefreshAuthTokenMessage } from './refresh-auth-token-message';
 import { ShutdownMessage } from './shutdown-message';
 
-export { AuthTokenMessage, createAuthTokenMessage, isAuthTokenMessage } from './auth-token-message';
-export { ErrorMessage, createErrorMessage, isErrorMessage } from './error-message';
 export {
-  InitializeMessage,
+  type AuthTokenMessage,
+  createAuthTokenMessage,
+  isAuthTokenMessage,
+} from './auth-token-message';
+export { type ErrorMessage, createErrorMessage, isErrorMessage } from './error-message';
+export {
+  type InitializeMessage,
   createInitializeMessage,
   isInitializeMessage,
 } from './initialize-message';
-export { PingMessage, createPingMessage, isPingMessage } from './ping-message';
-export { PongMessage, createPongMessage, isPongMessage } from './pong-message';
+export { type PingMessage, createPingMessage, isPingMessage } from './ping-message';
+export { type PongMessage, createPongMessage, isPongMessage } from './pong-message';
 export {
-  RefreshAuthTokenMessage,
+  type RefreshAuthTokenMessage,
   createRefreshAuthTokenMessage,
   isRefreshAuthTokenMessage,
 } from './refresh-auth-token-message';
-export { SfPdpIpcMessage, SfPdpIpcMessageTypes, isStaleMessage } from './sf-pdp-ipc-message';
-export { ShutdownMessage, createShutdownMessage, isShutdownMessage } from './shutdown-message';
+export { type SfPdpIpcMessage, SfPdpIpcMessageTypes, isStaleMessage } from './sf-pdp-ipc-message';
+export { type ShutdownMessage, createShutdownMessage, isShutdownMessage } from './shutdown-message';
 
 export type SfPdpMessage =
   | AuthTokenMessage

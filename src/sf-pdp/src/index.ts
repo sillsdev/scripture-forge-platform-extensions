@@ -13,6 +13,8 @@ import { getErrorMessage } from 'platform-bible-utils';
 import { RpcClient } from './papi-websocket/rpc-client';
 import * as SfBackend from './sf-backend/scripture-forge-back-end-connection';
 import * as log from './log';
+import { registerNetworkObject } from './papi-websocket/network-object';
+import { scriptureForgePdpFactory } from './pdp/pdp-factory';
 
 /**
  * SF-PDP (Scripture Forge Project Data Provider) Process
@@ -122,8 +124,10 @@ class SfPdpProcess {
         // TODO: Insert a proper event handler
         if (!(await this.rpcClient.connect(() => {})))
           throw new Error('Failed to connect RPC client to the PAPI web socket');
+
+        await registerNetworkObject(this.rpcClient, scriptureForgePdpFactory);
       } catch (error) {
-        this.exitProcess(`Error initializing RPC client: ${getErrorMessage(error)}`, 101);
+        this.exitProcess(`Error initializing PAPI connection: ${getErrorMessage(error)}`, 101);
       }
     })();
   }

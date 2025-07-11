@@ -243,7 +243,7 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
    */
   async isLoggedIn(): Promise<boolean> {
     try {
-      if (await this.#getAccessToken()) return true;
+      if (await this.getAccessToken()) return true;
     } catch (e) {
       logger.debug(`Error trying to get access token to check if logged in: ${getErrorMessage(e)}`);
     }
@@ -360,7 +360,7 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
       ? url
       : `${this.#serverConfiguration.scriptureForge.domain}${url.startsWith('/') ? '' : '/'}${url}`;
     logger.debug(`SF Auth provider fetching with authorization: ${fullUrl}`);
-    const accessToken = await this.#getAccessToken();
+    const accessToken = await this.getAccessToken();
     const fullOptions = {
       ...options,
       headers: { ...options.headers, Authorization: `Bearer ${accessToken}` },
@@ -410,7 +410,7 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
     try {
       newAccessToken = await this.#authTokensMutex.runExclusive(async () => {
         if (this.#authTokens) this.#authTokens.didExpire = true;
-        return this.#getAccessToken(false);
+        return this.getAccessToken(false);
       });
     } catch (e) {
       throw new Error(
@@ -444,41 +444,12 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
     }
   }
 
-  async dispose() {
-    this.#authorizeRequestInfo?.authorizationCodeAsyncVar.rejectWithReason(
-      'Login canceled because Scripture Forge authentication provider is disposing',
-    );
-
-    return true;
-  }
-
-  async #setAuthTokens(tokenSet: ResponseTokenSet | undefined): Promise<void> {
-    this.#authTokens = tokenSet
-      ? {
-          accessToken: tokenSet.access_token,
-          refreshToken: tokenSet.refresh_token ?? this.#authTokens?.refreshToken,
-          accessTokenExpireTime: getExpireTimeMs(tokenSet.expires_in),
-        }
-      : undefined;
-    if (this.storageManager) {
-      if (tokenSet) {
-        await this.storageManager.set(
-          getAuthTokensStorageKey(this.serverConfiguration),
-          JSON.stringify(this.#authTokens),
-        );
-      } else {
-        await this.storageManager.delete(getAuthTokensStorageKey(this.serverConfiguration));
-      }
-    }
-    this.emitSessionChangeEvent(undefined);
-  }
-
   /**
    * Gets the current access token for the logged-in user. Retrieves a new access token if the
    * current one expires. Throws if not logged in, access token is expired and refresh token doesn't
    * work, or failed to get access token in some other way
    */
-  async #getAccessToken(shouldAcquireLock = true): Promise<string> {
+  async getAccessToken(shouldAcquireLock = true): Promise<string> {
     const getAccessTokenInternal = async () => {
       if (!this.#authTokens && !this.#hasRetrievedAuthTokensFromStorage) {
         if (this.storageManager) {
@@ -544,6 +515,35 @@ export default class ScriptureForgeAuthenticationProvider implements Dispose {
 
     if (shouldAcquireLock) return this.#authTokensMutex.runExclusive(getAccessTokenInternal);
     return getAccessTokenInternal();
+  }
+
+  async dispose() {
+    this.#authorizeRequestInfo?.authorizationCodeAsyncVar.rejectWithReason(
+      'Login canceled because Scripture Forge authentication provider is disposing',
+    );
+
+    return true;
+  }
+
+  async #setAuthTokens(tokenSet: ResponseTokenSet | undefined): Promise<void> {
+    this.#authTokens = tokenSet
+      ? {
+          accessToken: tokenSet.access_token,
+          refreshToken: tokenSet.refresh_token ?? this.#authTokens?.refreshToken,
+          accessTokenExpireTime: getExpireTimeMs(tokenSet.expires_in),
+        }
+      : undefined;
+    if (this.storageManager) {
+      if (tokenSet) {
+        await this.storageManager.set(
+          getAuthTokensStorageKey(this.serverConfiguration),
+          JSON.stringify(this.#authTokens),
+        );
+      } else {
+        await this.storageManager.delete(getAuthTokensStorageKey(this.serverConfiguration));
+      }
+    }
+    this.emitSessionChangeEvent(undefined);
   }
 
   // #region OAuth requests
