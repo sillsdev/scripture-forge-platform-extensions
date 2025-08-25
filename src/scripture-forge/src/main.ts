@@ -1,6 +1,6 @@
 import papi, { logger } from '@papi/backend';
 import { ExecutionActivationContext, IWebViewProvider } from '@papi/core';
-import { formatReplacementString, isString } from 'platform-bible-utils';
+import { formatReplacementString, isPlatformError, isString } from 'platform-bible-utils';
 import ScriptureForgeAuthenticationProvider, {
   AUTH_PATH,
 } from './auth/scripture-forge-authentication-provider.model';
@@ -155,13 +155,21 @@ export async function activate(context: ExecutionActivationContext) {
   const updateServerConfigurationSubscriptionPromise = papi.settings.subscribe(
     'scriptureForge.serverConfiguration',
     (newServerConfiguration) => {
+      if (isPlatformError(newServerConfiguration)) {
+        logger.warn(`Error on getting new SF server configuration: ${newServerConfiguration}`);
+        return;
+      }
+
       authenticationProvider.serverConfiguration = newServerConfiguration;
     },
     { retrieveDataImmediately: false },
   );
 
-  const loginCommandPromise = papi.commands.registerCommand('scriptureForge.login', () =>
-    authenticationProvider.login(),
+  const loginCommandPromise = papi.commands.registerCommand(
+    'scriptureForge.login',
+    () => authenticationProvider.login(),
+    undefined,
+    { timeoutMilliseconds: 0 },
   );
 
   const logoutCommandPromise = papi.commands.registerCommand('scriptureForge.logout', () =>
