@@ -37,7 +37,7 @@ const homeWebViewProvider: IWebViewProviderWithType = {
 };
 
 export async function activate(context: ExecutionActivationContext) {
-  logger.info('Scripture Forge Extension is activating!');
+  logger.debug('Scripture Forge Extension is activating!');
 
   const homeWebViewProviderPromise = papi.webViewProviders.registerWebViewProvider(
     homeWebViewProvider.webViewType,
@@ -269,6 +269,6 @@ export async function activate(context: ExecutionActivationContext) {
 }
 
 export async function deactivate() {
-  logger.info('Scripture Forge Extension is deactivating!');
+  logger.debug('Scripture Forge Extension is deactivating!');
   return true;
 }
