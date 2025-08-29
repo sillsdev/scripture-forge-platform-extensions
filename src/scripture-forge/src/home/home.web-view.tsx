@@ -31,6 +31,7 @@ import {
   formatReplacementStringToArray,
   getErrorMessage,
   isLocalizeKey,
+  isPlatformError,
   isString,
   LocalizeKey,
 } from 'platform-bible-utils';
@@ -98,8 +99,17 @@ globalThis.webViewComponent = function ScriptureForgeHome({
   const [localizedStrings] = useLocalizedStrings(localizedStringKeys);
 
   const [serverConfigurationCondensed] = useSetting('scriptureForge.serverConfiguration', 'live');
+  if (isPlatformError(serverConfigurationCondensed)) {
+    logger.error(
+      `Failed to get server configuration, defaulting to "live": ${serverConfigurationCondensed.message}`,
+      serverConfigurationCondensed,
+    );
+  }
   const serverConfiguration = useMemo(
-    () => expandServerConfiguration(serverConfigurationCondensed),
+    () =>
+      expandServerConfiguration(
+        isPlatformError(serverConfigurationCondensed) ? 'live' : serverConfigurationCondensed,
+      ),
     [serverConfigurationCondensed],
   );
 

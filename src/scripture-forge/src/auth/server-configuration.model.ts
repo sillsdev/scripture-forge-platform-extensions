@@ -18,6 +18,7 @@ const SERVER_CONFIGURATIONS: {
   dev: {
     scriptureForge: {
       domain: 'localhost',
+      webSocket: 'ws://localhost',
     },
     auth: {
       domain: 'https://sil-appbuilder.auth0.com',
@@ -27,15 +28,20 @@ const SERVER_CONFIGURATIONS: {
   qa: {
     scriptureForge: {
       domain: 'https://qa.scriptureforge.org',
+      webSocket: 'wss://qa.scriptureforge.org/realtime-api',
     },
     auth: {
       domain: 'https://dev-sillsdev.auth0.com',
       clientId: '4eHLjo40mAEGFU6zUxdYjnpnC1K1Ydnj',
+      // This clientId was setup within Auth0 as a separate application with more redirect URL options
+      // However, it was not setup in https://github.com/sillsdev/auth0-configs, so it will disappear the next time a config is pushed
+      // clientId: 'keZORmin26og8b8cNvcdLTTu9GRUu5VA',
     },
   },
   live: {
     scriptureForge: {
       domain: 'https://scriptureforge.org',
+      webSocket: 'wss://scriptureforge.org/ws',
     },
     auth: {
       domain: 'https://login.languagetechnology.org',
