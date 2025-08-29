@@ -1,7 +1,7 @@
 {
   "name": "scripture-forge",
   "private": true,
-  "version": "0.2.0-alpha.0",
+  "version": "0.3.0-alpha.0",
   "main": "src/main.js",
   "types": "src/types/scripture-forge.d.ts",
   "author": "SIL",
