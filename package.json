@@ -109,7 +109,7 @@
     "webpack-merge": "^6.0.1",
     "zip-folder-promise": "^1.2.0"
   },
-  "workspaces": ["src/*", "sf-pdp", "messages"],
+  "workspaces": ["src/*"],
   "volta": {
     "node": "22.16.0"
   }

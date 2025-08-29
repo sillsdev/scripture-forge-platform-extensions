@@ -19,9 +19,6 @@ npm run build
 
 # Build for production
 npm run build:production
-
-# Watch for changes during development
-npm run watch
 ```
 
 ## Running
@@ -29,9 +26,6 @@ npm run watch
 ```bash
 # Run the built process
 npm start
-
-# Run in development mode with ts-node
-npm run dev
 ```
 
 ## Integration
@@ -53,11 +47,12 @@ interface SfPdpMessage {
 
 ### Message Types
 
-- `init`: Initialize the process with configuration
-- `process`: Process project data (action, projectId, data)
-- `ping`: Health check
-- `shutdown`: Graceful shutdown
-- `response`: Response to any of the above
+- `ping`: Initialize (and could be used as a health check)
+- `pong`: Respond to a ping message
+- `getProjects`: Request to get a list of available projects (sent from the SF PDP process to the extension host since the extension host talks with the REST API while the SF PDP process talks with the websocket)
+- `projectResults`: Response to a getProjects message
+- `error`: Send information about an error that occurred
+- `shutdown`: Graceful shutdown (sent by the extension host to the SF PDP process)
 
 ### Example Usage
 
@@ -68,28 +63,18 @@ import * as path from 'path';
 const sfPdpPath = path.join(__dirname, 'assets', 'sf-pdp', 'index.js');
 const child = fork(sfPdpPath);
 
-// Initialize
-child.send({
-  type: 'init',
-  id: 'init-1',
-  data: { logLevel: 'debug', workspaceDir: '/path/to/workspace' },
+child.on('exit', (code) => {
+  if (code === 0) {
+    logger.info('SF PDP exited gracefully');
+  } else {
+    logger.error(`SF PDP exited with code ${code}`);
+  }
 });
 
-// Process data
-child.send({
-  type: 'process',
-  id: 'proc-1',
-  data: {
-    action: 'validate',
-    projectId: 'project-123',
-    data: {
-      /* project data */
-    },
-  },
+child.on('message', (message: SfPdpMessage) => {
+  handleMessage(message);
 });
 
-// Handle responses
-child.on('message', (message) => {
-  console.log('Received:', message);
-});
+// Initialize with a ping message
+child.send(createPingMessage(getNextMessageId()));
 ```

@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "build": "npm run build:types && npm run build:functions",
-    "build:functions": "npx esbuild index.ts --bundle --minify --platform=node --outfile=dist/index.js",
+    "build:functions": "esbuild index.ts --bundle --minify --platform=node --outfile=dist/index.js",
     "build:production": "cross-env NODE_ENV=production npm run build",
     "build:types": "tsc --emitDeclarationOnly"
   },

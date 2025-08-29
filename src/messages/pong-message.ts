@@ -2,7 +2,6 @@ import { SfPdpIpcMessage } from './sf-pdp-ipc-message';
 
 export type PongMessage = SfPdpIpcMessage & {
   type: 'pong';
-  timestamp: number;
 };
 
 export function isPongMessage(message: SfPdpIpcMessage): message is PongMessage {
