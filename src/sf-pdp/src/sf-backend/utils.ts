@@ -63,7 +63,7 @@ export function isMessageSendingOp(value: unknown): value is { a: 'op' } {
  * @returns The parsed object of type T, or `undefined` if the value is not a string or parsing
  *   fails.
  */
-export function tryParseJSON<T>(value: unknown): T | undefined {
+export function tryParseJson<T>(value: unknown): T | undefined {
   if (typeof value !== 'string') return undefined;
   try {
     return JSON.parse(value);

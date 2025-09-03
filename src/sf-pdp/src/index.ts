@@ -12,7 +12,7 @@ import {
 } from 'sf-pdp-messages';
 import { AsyncVariable, getErrorMessage } from 'platform-bible-utils';
 import { RpcClient } from './papi-websocket/rpc-client';
-import * as SfBackend from './sf-backend/scripture-forge-back-end-connection';
+import { SCRIPTURE_FORGE_BACK_END_CONNECTION } from './sf-backend/scripture-forge-back-end-connection';
 import * as log from './log';
 import { registerNetworkObject } from './papi-websocket/network-object';
 import { scriptureForgePdpFactory, setGetProjectsMessage, setRpcClient } from './pdp/pdp-factory';
@@ -25,15 +25,15 @@ import { setOrigin } from './sf-backend/custom-origin-websocket';
  * It handles project data processing tasks in isolation from the extension host process.
  */
 
-type SfPdpConfig = {
+export type SfPdpConfig = {
   httpBaseUrl?: string;
   wssBaseUrl?: string;
   papiPort?: number;
 };
 
-class SfPdpProcess {
+export class SfPdpProcess {
+  private readonly config: SfPdpConfig = {};
   private nextMsgId: number = 0;
-  private config: SfPdpConfig = {};
   private receivedPing = false;
   private receivedPong = false;
   private rpcClient: RpcClient | undefined;
@@ -148,7 +148,7 @@ class SfPdpProcess {
       try {
         if (!this.config.wssBaseUrl) throw new Error('WSS base URL is not configured');
         if (!this.currentAuthToken) throw new Error('Current auth token is not set');
-        await SfBackend.ScriptureForgeBackEndConnection.connect(
+        await SCRIPTURE_FORGE_BACK_END_CONNECTION.connect(
           this.config.wssBaseUrl,
           this.currentAuthToken,
         );
@@ -201,6 +201,3 @@ if (require.main === module) {
   const process = new SfPdpProcess();
   process.start();
 }
-
-export { SfPdpProcess };
-export type { SfPdpConfig };

@@ -1,6 +1,6 @@
 import { DeltaOperation, ScriptureForgeProjectDocument } from 'scripture-forge';
 import { SerializedVerseRef } from '@sillsdev/scripture';
-import { ScriptureForgeBackEndConnection } from '../sf-backend/scripture-forge-back-end-connection';
+import { SCRIPTURE_FORGE_BACK_END_CONNECTION } from '../sf-backend/scripture-forge-back-end-connection';
 import { bindClassMethods } from '../papi-websocket/util';
 import { Delta } from '../sf-backend/rce-utils';
 import { RpcClient } from '../papi-websocket/rpc-client';
@@ -40,18 +40,19 @@ export class ScriptureForgeProjectDataProvider {
   }
 
   async getProject(): Promise<ScriptureForgeProjectDocument> {
-    return (await ScriptureForgeBackEndConnection.getProjectDoc(this.projectId)).data;
+    return (await SCRIPTURE_FORGE_BACK_END_CONNECTION.getProjectDoc(this.projectId)).data;
   }
 
   async getChapterDeltaOperations(verseRef: SerializedVerseRef): Promise<DeltaOperation[]> {
-    return (await ScriptureForgeBackEndConnection.getChapterDoc(this.projectId, verseRef)).data.ops;
+    return (await SCRIPTURE_FORGE_BACK_END_CONNECTION.getChapterDoc(this.projectId, verseRef)).data
+      .ops;
   }
 
   async setChapterDeltaOperations(
     verseRef: SerializedVerseRef,
     updatesToApply: DeltaOperation[],
   ): Promise<void> {
-    const doc = await ScriptureForgeBackEndConnection.getChapterDoc(this.projectId, verseRef);
+    const doc = await SCRIPTURE_FORGE_BACK_END_CONNECTION.getChapterDoc(this.projectId, verseRef);
     doc.submitOp(new Delta(updatesToApply));
     this.rpcClient.emitEventOnNetwork(this.dataUpdateEventName, 'ChapterDeltaOperations');
   }

@@ -34,16 +34,7 @@ The built process artifacts are copied to the scripture-forge extension's assets
 
 ## API
 
-The process communicates with the parent via IPC messages with the following structure:
-
-```typescript
-interface SfPdpMessage {
-  type: 'init' | 'process' | 'shutdown' | 'ping' | 'response';
-  id?: string;
-  data?: any;
-  error?: string;
-}
-```
+The process communicates with the parent via IPC messages. Message TS types are exported from `../messages/index.ts`.
 
 ### Message Types
 

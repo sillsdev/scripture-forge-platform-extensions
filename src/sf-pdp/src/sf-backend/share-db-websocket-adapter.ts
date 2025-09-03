@@ -1,5 +1,5 @@
 import { WebSocket } from 'partysocket';
-import { hasStringProperty, isMessageSendingOp, tryParseJSON } from './utils';
+import { hasStringProperty, isMessageSendingOp, tryParseJson } from './utils';
 
 export type ScriptureForgeWebSocketMessage = string | ArrayBuffer | Blob | ArrayBufferView;
 
@@ -47,7 +47,8 @@ export type ScriptureForgeWebSocketMessage = string | ArrayBuffer | Blob | Array
  */
 export class ShareDBWebsocketAdapter extends WebSocket {
   /** The listeners to call before sending an op. */
-  private beforeSendOpListeners: ((collection: string, docId: string) => Promise<void>)[] = [];
+  private readonly beforeSendOpListeners: ((collection: string, docId: string) => Promise<void>)[] =
+    [];
 
   /**
    * Adds a listener that will be called before an op is sent to the server. This allows the op to
@@ -71,7 +72,7 @@ export class ShareDBWebsocketAdapter extends WebSocket {
    * @returns A promise.
    */
   async send(data: ScriptureForgeWebSocketMessage): Promise<void> {
-    const msg: unknown = tryParseJSON(data);
+    const msg: unknown = tryParseJson(data);
     if (isMessageSendingOp(msg) && hasStringProperty(msg, 'c') && hasStringProperty(msg, 'd'))
       await this.beforeSendOp(msg.c, msg.d);
     super.send(data);

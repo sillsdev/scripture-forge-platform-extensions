@@ -191,7 +191,7 @@ async function getChapterDoc(
  * Represents the connection to the Scripture Forge backend for reading and writing project-related
  * data over the WebSocket.
  */
-export const ScriptureForgeBackEndConnection = {
+export const SCRIPTURE_FORGE_BACK_END_CONNECTION = {
   /**
    * Establishes a connection to the Scripture Forge backend. Ensures that the client is ready to
    * interact with the backend services.
@@ -231,3 +231,4 @@ export const ScriptureForgeBackEndConnection = {
    */
   getChapterDoc,
 };
+Object.freeze(SCRIPTURE_FORGE_BACK_END_CONNECTION);

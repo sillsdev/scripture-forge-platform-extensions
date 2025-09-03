@@ -49,8 +49,8 @@ async function getAvailableProjects(): Promise<ProjectMetadataWithoutFactoryInfo
   return retVal;
 }
 
+const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 function generateRandomLetters(length: number): string {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
   for (let i = 0; i < length; i++) {
     const randomIndex = Math.floor(Math.random() * characters.length);
