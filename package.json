@@ -16,7 +16,7 @@
     "bump-versions": "tsx ./lib/bump-versions.ts",
     "bundle:sf-pdp": "npm run build:sf-pdp && npm run copy:sf-pdp",
     "bundle:sf-pdp:production": "npm run build:sf-pdp:production && npm run copy:sf-pdp",
-    "copy:sf-pdp": "mkdir -p src/scripture-forge/assets/sf-pdp && cp -r src/sf-pdp/dist/* src/scripture-forge/assets/sf-pdp/ && mkdir -p src/scripture-forge/assets/sf-pdp/node_modules/sf-pdp-messages && cp -r src/messages/dist/* src/scripture-forge/assets/sf-pdp/node_modules/sf-pdp-messages/ && cp src/messages/package.json src/scripture-forge/assets/sf-pdp/node_modules/sf-pdp-messages/",
+    "copy:sf-pdp": "tsx ./lib/copy-sf-pdp.ts",
     "create-extension": "tsx ./lib/create-extension.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

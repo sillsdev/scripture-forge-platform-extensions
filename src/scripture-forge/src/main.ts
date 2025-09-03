@@ -242,6 +242,7 @@ export async function activate(context: ExecutionActivationContext) {
 
   if (realTimeCollaborativeEditingEnabled) {
     // Verified createProcess exists earlier
+    // eslint-disable-next-line no-type-assertion/no-type-assertion
     childProcess = context.elevatedPrivileges.createProcess!.fork(
       context.executionToken,
       'assets/sf-pdp/index.js',

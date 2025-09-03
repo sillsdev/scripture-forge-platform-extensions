@@ -11,7 +11,8 @@ import { expandServerConfiguration } from '../auth/server-configuration.model';
 import ScriptureForgeAuthenticationProvider from '../auth/scripture-forge-authentication-provider.model';
 import ScriptureForgeApi from './scripture-forge-api.model';
 
-// PAPI websocket port - It would be good to get this from some config instead of hardcoding it
+// PAPI websocket port
+// TODO: It would be good to get this from some config instead of hardcoding it
 const WEBSOCKET_PORT = 8876;
 
 let childProcess: ChildProcess | undefined;
