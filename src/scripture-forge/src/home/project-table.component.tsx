@@ -21,6 +21,7 @@ import {
   SlingshotDraftSetupState,
   SlingshotProjectConnectionState,
 } from 'scripture-forge';
+import { isDraftCurrentlyGenerating } from '../utils';
 
 type SortConfig = {
   key: 'fullName' | 'language' | 'draftSetupState' | 'action';
@@ -138,8 +139,7 @@ export default function ProjectTable({
             const draftInfo = await draftInfoPdp.getDraftInfo(undefined);
 
             if (
-              draftInfo.currentlyGeneratingDraftStatus &&
-              draftInfo.currentlyGeneratingDraftStatus.state !== 'COMPLETED' &&
+              isDraftCurrentlyGenerating(draftInfo.currentlyGeneratingDraftStatus?.state) &&
               !pollTimeout
             )
               pollTimeout = setTimeout(() => {
@@ -247,9 +247,9 @@ export default function ProjectTable({
 
   const buildTableDraftSetupStateElement = (projectInfo: ProjectInfo) => {
     const { connectionState, draftSetupState } = projectInfo.draftInfo;
-    const isDraftGenerating =
-      projectInfo.draftInfo.currentlyGeneratingDraftStatus &&
-      projectInfo.draftInfo.currentlyGeneratingDraftStatus.state !== 'COMPLETED';
+    const isDraftGenerating = isDraftCurrentlyGenerating(
+      projectInfo.draftInfo.currentlyGeneratingDraftStatus?.state,
+    );
 
     let statusText = '';
 
@@ -339,9 +339,9 @@ export default function ProjectTable({
           </div>
         );
       case 'connected': {
-        const isDraftGenerating =
-          projectInfo.draftInfo.currentlyGeneratingDraftStatus &&
-          projectInfo.draftInfo.currentlyGeneratingDraftStatus.state !== 'COMPLETED';
+        const isDraftGenerating = isDraftCurrentlyGenerating(
+          projectInfo.draftInfo.currentlyGeneratingDraftStatus?.state,
+        );
 
         if (draftSetupState === 'hasFinishedDraft')
           return (

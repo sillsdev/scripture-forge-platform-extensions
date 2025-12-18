@@ -136,10 +136,13 @@ export default class SlingshotProjectDataProviderEngine
         `${this.projectInfo.projectId} SF Project endpoint indicated there is a finished draft but received response for last completed ${lastCompletedDraftStatus} and for currently generating ${currentlyGeneratingDraftStatus}! Not sure what to do with this`,
       );
 
-    if (lastCompletedDraftStatus === StatusCodes.NO_CONTENT) {
+    if (
+      lastCompletedDraftStatus === StatusCodes.NO_CONTENT ||
+      lastCompletedDraftStatus === StatusCodes.NOT_FOUND
+    ) {
       if (draftSetupState === 'hasFinishedDraft')
         throw new Error(
-          `${this.projectInfo.projectId} SF Project endpoint indicated there is a finished draft but received no content response for last completed ${lastCompletedDraftStatus}! Not sure what to do with this`,
+          `${this.projectInfo.projectId} SF Project endpoint indicated there is a finished draft but received non-content response for last completed ${lastCompletedDraftStatus}! Not sure what to do with this`,
         );
     } else if (typeof lastCompletedDraftStatus === 'number')
       throw new Error(
@@ -150,20 +153,27 @@ export default class SlingshotProjectDataProviderEngine
 
     if (
       typeof currentlyGeneratingDraftStatus === 'number' &&
-      currentlyGeneratingDraftStatus !== StatusCodes.NO_CONTENT
+      currentlyGeneratingDraftStatus !== StatusCodes.NO_CONTENT &&
+      currentlyGeneratingDraftStatus !== StatusCodes.NOT_FOUND
     )
       throw new Error(
         `Requesting currently generating draft status for SF project id ${this.projectInfo.projectId} returned error code ${lastCompletedDraftStatus}! Not sure what to do with this`,
       );
 
-    if (lastCompletedDraftStatus !== StatusCodes.NO_CONTENT) {
+    if (
+      lastCompletedDraftStatus !== StatusCodes.NO_CONTENT &&
+      lastCompletedDraftStatus !== StatusCodes.NOT_FOUND
+    ) {
       if (draftSetupState === 'draftingNotAvailable')
         throw new Error(
           `${this.projectInfo.projectId} SF Project endpoint indicated drafting is not available, but we received draft information from last completed! Not sure what to do with this`,
         );
       draftInfo.lastCompletedDraftStatus = lastCompletedDraftStatus;
     }
-    if (currentlyGeneratingDraftStatus !== StatusCodes.NO_CONTENT) {
+    if (
+      currentlyGeneratingDraftStatus !== StatusCodes.NO_CONTENT &&
+      currentlyGeneratingDraftStatus !== StatusCodes.NOT_FOUND
+    ) {
       if (draftSetupState === 'draftingNotAvailable')
         throw new Error(
           `${this.projectInfo.projectId} SF Project endpoint indicated drafting is not available, but we received draft information from currently generating! Not sure what to do with this`,
