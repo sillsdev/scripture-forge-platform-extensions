@@ -200,7 +200,7 @@ export async function activate(context: ExecutionActivationContext) {
   // #region set up Slingshot PDPF
 
   // Exclude the Slingshot PDPF from being included in the Home projects list since drafts need
-  // to be opened from Auto Drafts page for now in order to include the header and border. Also
+  // to be opened from draft generation page for now in order to include the header and border. Also
   // we don't keep track of which projects have drafts in a way that Home could not list those
   // without drafts
   const excludePDPFIdsInHome = await papi.settings.get(
@@ -231,8 +231,8 @@ export async function activate(context: ExecutionActivationContext) {
 
   // #endregion
 
-  const openAutoDraftsCommandPromise = papi.commands.registerCommand(
-    'scriptureForge.openAutoDrafts',
+  const openGeneratedDraftsCommandPromise = papi.commands.registerCommand(
+    'scriptureForge.openGeneratedDrafts',
     async () => {
       return papi.webViews.openWebView(SCRIPTURE_FORGE_HOME_WEB_VIEW_TYPE, {
         type: 'tab',
@@ -260,7 +260,7 @@ export async function activate(context: ExecutionActivationContext) {
     await logoutCommandPromise,
     await isLoggedInCommandPromise,
     await slingshotPdpefPromise,
-    await openAutoDraftsCommandPromise,
+    await openGeneratedDraftsCommandPromise,
   );
 
   // #region first startup actions - disabled for now since this extension is bundled into the app

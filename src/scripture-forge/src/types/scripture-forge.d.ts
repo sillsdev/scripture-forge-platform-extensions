@@ -448,7 +448,7 @@ declare module 'papi-shared-types' {
      *
      * @returns WebView id for new Scripture Forge home WebView or `undefined` if not created
      */
-    'scriptureForge.openAutoDrafts': () => Promise<string | undefined>;
+    'scriptureForge.openGeneratedDrafts': () => Promise<string | undefined>;
   }
 
   export interface ProjectDataProviderInterfaces {
