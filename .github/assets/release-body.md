@@ -1,6 +1,6 @@
 Includes:
 
-- Scripture Forge Auto Drafts Extension
+- Scripture Forge Draft Generation Extension
 
 Tested on Platform.Bible vX.Y.Z. Expected to be compatible with at least vX.Y.\*.
 
