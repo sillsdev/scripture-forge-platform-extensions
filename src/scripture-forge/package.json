@@ -39,7 +39,7 @@
     "sf-pdp-messages": "file:../messages"
   },
   "devDependencies": {
-    "@biblionexus-foundation/scripture-utilities": "~0.0.7",
+    "@eten-tech-foundation/scripture-utilities": "~0.1.6",
     "@swc/core": "1.13.3",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "22.15.34",
