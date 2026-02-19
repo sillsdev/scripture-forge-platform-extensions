@@ -12,7 +12,7 @@ import {
 import type { ProjectSettingTypes } from 'papi-shared-types';
 import type { USJChapterProjectInterfaceDataTypes } from 'platform-scripture';
 import { Canon, SerializedVerseRef } from '@sillsdev/scripture';
-import { Usj } from '@biblionexus-foundation/scripture-utilities';
+import { Usj } from '@eten-tech-foundation/scripture-utilities';
 import { StatusCodes } from 'http-status-codes';
 import { deepEqual } from 'platform-bible-utils';
 import ScriptureForgeApi, { ScriptureForgeProjectInfo } from './scripture-forge-api.model';

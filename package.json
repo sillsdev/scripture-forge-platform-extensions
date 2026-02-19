@@ -42,7 +42,7 @@
     "react-dom": ">=18.3.1"
   },
   "dependencies": {
-    "@sillsdev/scripture": "^2.0.2",
+    "@sillsdev/scripture": "^2.0.3",
     "partysocket": "^1.1.4",
     "platform-bible-utils": "file:../paranext-core/lib/platform-bible-utils",
     "quill-delta": "^5.1.0",
@@ -104,7 +104,7 @@
     "tsconfig-paths-webpack-plugin": "^4.2.0",
     "tsx": "^4.19.2",
     "typescript": "^5.8.3",
-    "webpack": "^5.97.1",
+    "webpack": "^5.105.2",
     "webpack-cli": "^5.1.4",
     "webpack-merge": "^6.0.1",
     "zip-folder-promise": "^1.2.0"

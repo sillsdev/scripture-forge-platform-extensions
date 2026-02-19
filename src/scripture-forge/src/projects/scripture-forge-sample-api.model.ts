@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import { SlingshotDraftBuildInfo, SlingshotDraftBuildState } from 'scripture-forge';
-import { Usj } from '@biblionexus-foundation/scripture-utilities';
+import { Usj } from '@eten-tech-foundation/scripture-utilities';
 import { logger } from '@papi/backend';
 import { wait } from 'platform-bible-utils';
 import ScriptureForgeApi, { ScriptureForgeProjectInfo } from './scripture-forge-api.model';

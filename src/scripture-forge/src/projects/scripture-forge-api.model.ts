@@ -1,6 +1,6 @@
 import { SlingshotDraftBuildInfo } from 'scripture-forge';
 import { StatusCodes } from 'http-status-codes';
-import { Usj } from '@biblionexus-foundation/scripture-utilities';
+import { Usj } from '@eten-tech-foundation/scripture-utilities';
 import ScriptureForgeAuthenticationProvider from '../auth/scripture-forge-authentication-provider.model';
 
 const PROJECT_ENDPOINT = '/paratext-api/projects';
