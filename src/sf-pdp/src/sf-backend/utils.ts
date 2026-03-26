@@ -67,7 +67,7 @@ export function tryParseJson<T>(value: unknown): T | undefined {
   if (typeof value !== 'string') return undefined;
   try {
     return JSON.parse(value);
-  } catch (error) {
+  } catch {
     return undefined;
   }
 }
