@@ -118,6 +118,7 @@ export async function activate(context: ExecutionActivationContext) {
             } catch (e) {
               logger.debug(
                 `Scripture Forge storage manager did not find user data for key: ${key}`,
+                e,
               );
               return undefined;
             }
