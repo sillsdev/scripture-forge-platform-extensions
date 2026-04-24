@@ -446,9 +446,16 @@ declare module 'papi-shared-types' {
     /**
      * Opens a new Scripture Forge home web view and returns the WebView id
      *
+     * @deprecated Jan 8 2026. Use `scriptureForge.openGeneratedDrafts` instead.
      * @returns WebView id for new Scripture Forge home WebView or `undefined` if not created
      */
     'scriptureForge.openAutoDrafts': () => Promise<string | undefined>;
+    /**
+     * Opens a new Scripture Forge home web view and returns the WebView id
+     *
+     * @returns WebView id for new Scripture Forge home WebView or `undefined` if not created
+     */
+    'scriptureForge.openGeneratedDrafts': () => Promise<string | undefined>;
   }
 
   export interface ProjectDataProviderInterfaces {

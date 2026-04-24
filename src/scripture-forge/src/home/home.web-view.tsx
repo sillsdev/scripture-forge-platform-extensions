@@ -48,8 +48,8 @@ const localizedStringKeys: LocalizeKey[] = [
   '%scriptureForge_home_description_md%',
   '%scriptureForge_logo_alt_text%',
   '%scriptureForge_overline_title%',
-  '%scriptureForge_drafts_title%',
-  '%scriptureForge_login_page_title%',
+  '%scriptureForge_drafts_title_2%',
+  '%scriptureForge_login_page_title_2%',
   '%scriptureForge_login_page_subtitle%',
   '%general_error_title%',
   '%scriptureForge_draft_status_notConnected%',
@@ -61,7 +61,7 @@ const localizedStringKeys: LocalizeKey[] = [
   '%scriptureForge_draft_action_cannotSetUp%',
   '%scriptureForge_draft_action_canSetUp%',
   '%scriptureForge_draft_action_canJoin%',
-  '%scriptureForge_draft_action_cannotAccessDrafts%',
+  '%scriptureForge_draft_action_cannotAccessDrafts_2%',
   '%scriptureForge_draft_action_connected_viewOldDraft%',
   '%scriptureForge_draft_action_connected_viewDraft%',
   '%scriptureForge_draft_action_connected_generate%',
@@ -191,7 +191,7 @@ globalThis.webViewComponent = function ScriptureForgeHome({
     <div className="tw-flex tw-bg-sidebar tw-min-h-screen tw-p-2 tw-items-center tw-justify-center">
       <Card className="tw-max-w-md">
         <CardHeader>
-          <CardTitle>{localizedStrings['%scriptureForge_login_page_title%']}</CardTitle>
+          <CardTitle>{localizedStrings['%scriptureForge_login_page_title_2%']}</CardTitle>
           <CardDescription>
             {localizedStrings['%scriptureForge_login_page_subtitle%']}
           </CardDescription>
@@ -247,7 +247,7 @@ globalThis.webViewComponent = function ScriptureForgeHome({
       </div>
       <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-px-4 tw-pb-3">
         <div className="tw-text-2xl tw-font-semibold">
-          {localizedStrings['%scriptureForge_drafts_title%']}
+          {localizedStrings['%scriptureForge_drafts_title_2%']}
         </div>
         <Button
           onClick={() => {

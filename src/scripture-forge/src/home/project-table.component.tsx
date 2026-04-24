@@ -335,7 +335,7 @@ export default function ProjectTable({
       case 'cannotAccessDrafts':
         return (
           <div className="tw-text-xs">
-            {localizedStrings['%scriptureForge_draft_action_cannotAccessDrafts%']}
+            {localizedStrings['%scriptureForge_draft_action_cannotAccessDrafts_2%']}
           </div>
         );
       case 'connected': {
@@ -355,7 +355,7 @@ export default function ProjectTable({
                     'platformScriptureEditor.openResourceViewer',
                     projectInfo.projectId,
                     {
-                      title: '%webView_scriptureForge_editor_title_format%',
+                      title: '%webView_scriptureForge_editor_title_format_2%',
                       iconUrl:
                         'papi-extension://scriptureForge/assets/images/lucide-sparkles-0.378.0.svg',
                       decorations: {

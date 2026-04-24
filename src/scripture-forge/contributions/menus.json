@@ -4,11 +4,11 @@
     "groups": {},
     "items": [
       {
-        "label": "%mainMenu_scriptureForge_openAutoDrafts_label%",
-        "localizeNotes": "Application main menu > Project > Open Auto Drafts",
+        "label": "%mainMenu_scriptureForge_openGeneratedDrafts_label%",
+        "localizeNotes": "Application main menu > Project > Open Scripture Forge generated drafts",
         "group": "platform.projectResources",
         "order": 1002,
-        "command": "scriptureForge.openAutoDrafts"
+        "command": "scriptureForge.openGeneratedDrafts"
       }
     ]
   },
