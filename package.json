@@ -42,7 +42,7 @@
     "react-dom": ">=18.3.1"
   },
   "dependencies": {
-    "@sillsdev/scripture": "^2.0.3",
+    "@sillsdev/scripture": "^2.0.5",
     "partysocket": "^1.1.4",
     "platform-bible-utils": "file:../paranext-core/lib/platform-bible-utils",
     "quill-delta": "^5.1.0",
@@ -85,6 +85,7 @@
     "glob": "^10.5.0",
     "http-status-codes": "^2.3.0",
     "lucide-react": "^0.475.0",
+    "minimatch": "^9.0.9",
     "papi-dts": "file:../paranext-core/lib/papi-dts",
     "platform-bible-react": "file:../paranext-core/lib/platform-bible-react",
     "postcss": "^8.5.3",
