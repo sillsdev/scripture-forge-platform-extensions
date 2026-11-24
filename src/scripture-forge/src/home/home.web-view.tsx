@@ -77,7 +77,7 @@ const localizedStringKeys: LocalizeKey[] = [
 function ErrorAlert({ title, description }: { title: string; description: string }) {
   return (
     <Alert variant="destructive">
-      <AlertCircle className="tw-h-4 tw-w-4" />
+      <AlertCircle className="tw:h-4 tw:w-4" />
       <AlertTitle>{title}</AlertTitle>
       <AlertDescription>{description}</AlertDescription>
     </Alert>
@@ -185,11 +185,11 @@ globalThis.webViewComponent = function ScriptureForgeHome({
   let logInOrOutButtonContents: ReactNode = isLoggedIn
     ? localizedStrings['%scriptureForge_home_logout_action_label%']
     : localizedStrings['%scriptureForge_home_login_action_label%'];
-  if (isLoginBusy) logInOrOutButtonContents = <Spinner className="tw-h-4 tw-w-4" />;
+  if (isLoginBusy) logInOrOutButtonContents = <Spinner className="tw:h-4 tw:w-4" />;
 
   return !isLoggedIn ? (
-    <div className="tw-flex tw-bg-sidebar tw-min-h-screen tw-p-2 tw-items-center tw-justify-center">
-      <Card className="tw-max-w-md">
+    <div className="tw:flex tw:bg-sidebar tw:min-h-screen tw:p-2 tw:items-center tw:justify-center">
+      <Card className="tw:max-w-md">
         <CardHeader>
           <CardTitle>{localizedStrings['%scriptureForge_login_page_title%']}</CardTitle>
           <CardDescription>
@@ -234,19 +234,19 @@ globalThis.webViewComponent = function ScriptureForgeHome({
       </Card>
     </div>
   ) : (
-    <div className="tw-flex tw-flex-col tw-h-screen">
-      <div className="tw-flex tw-px-4 tw-gap-2 tw-pt-2 tw-pb-1">
+    <div className="tw:flex tw:flex-col tw:h-screen">
+      <div className="tw:flex tw:px-4 tw:gap-2 tw:pt-2 tw:pb-1">
         <img
           src={iconUrl}
           alt={localizedStrings['%scriptureForge_logo_alt_text%']}
-          className="tw-w-5"
+          className="tw:w-5"
         />
-        <div className="tw-text-sm tw-font-semibold">
+        <div className="tw:text-sm tw:font-semibold">
           {localizedStrings['%scriptureForge_overline_title%']}
         </div>
       </div>
-      <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-px-4 tw-pb-3">
-        <div className="tw-text-2xl tw-font-semibold">
+      <div className="tw:flex tw:items-center tw:justify-between tw:w-full tw:px-4 tw:pb-3">
+        <div className="tw:text-2xl tw:font-semibold">
           {localizedStrings['%scriptureForge_drafts_title%']}
         </div>
         <Button
@@ -265,7 +265,7 @@ globalThis.webViewComponent = function ScriptureForgeHome({
           description={loginErrorMessage}
         />
       )}
-      <div className="tw-flex-1 tw-overflow-auto tw-pt-2 tw-px-1">
+      <div className="tw:flex-1 tw:overflow-auto tw:pt-2 tw:px-1">
         <ProjectTable
           serverConfiguration={serverConfiguration}
           useWebViewState={useWebViewState}

@@ -70,8 +70,8 @@ const DRAFT_GENERATING_POLL_TIME_MS = 30 * 1000;
 
 function ExternalLinkButton({ link, children }: PropsWithChildren<{ link: string }>) {
   return (
-    <Button variant="secondary" onClick={() => window.open(link)} className="tw-text-sm">
-      <span className="tw-pe-1">{children}</span>
+    <Button variant="secondary" onClick={() => window.open(link)} className="tw:text-sm">
+      <span className="tw:pe-1">{children}</span>
       <ExternalLink />
     </Button>
   );
@@ -232,14 +232,14 @@ export default function ProjectTable({
 
   const buildTableHead = (key: SortConfig['key'], label: string, className?: string) => (
     <TableHead className={className} onClick={() => handleSort(key)}>
-      <div className="tw-flex tw-items-center">
-        <div className="tw-font-normal">{label}</div>
-        {sortConfig.key !== key && <ChevronsUpDown className="tw-ps-1" size={16} />}
+      <div className="tw:flex tw:items-center">
+        <div className="tw:font-normal">{label}</div>
+        {sortConfig.key !== key && <ChevronsUpDown className="tw:ps-1" size={16} />}
         {sortConfig.key === key &&
           (sortConfig.direction === 'ascending' ? (
-            <ChevronUp className="tw-ps-1" size={16} />
+            <ChevronUp className="tw:ps-1" size={16} />
           ) : (
-            <ChevronDown className="tw-ps-1" size={16} />
+            <ChevronDown className="tw:ps-1" size={16} />
           ))}
       </div>
     </TableHead>
@@ -280,7 +280,7 @@ export default function ProjectTable({
       }
     }
 
-    return <div className="tw-text-xs">{statusText}</div>;
+    return <div className="tw:text-xs">{statusText}</div>;
   };
 
   const buildTableActionElement = (projectInfo: ProjectInfo) => {
@@ -291,7 +291,7 @@ export default function ProjectTable({
         return;
       case 'cannotSetUp':
         return (
-          <div className="tw-text-xs">
+          <div className="tw:text-xs">
             {localizedStrings['%scriptureForge_draft_action_cannotSetUp%']}
           </div>
         );
@@ -326,7 +326,7 @@ export default function ProjectTable({
                 );
               }
             }}
-            className="tw-text-sm"
+            className="tw:text-sm"
           >
             {isJoining ? <Spinner /> : localizedStrings['%scriptureForge_draft_action_canJoin%']}
           </Button>
@@ -334,7 +334,7 @@ export default function ProjectTable({
       }
       case 'cannotAccessDrafts':
         return (
-          <div className="tw-text-xs">
+          <div className="tw:text-xs">
             {localizedStrings['%scriptureForge_draft_action_cannotAccessDrafts%']}
           </div>
         );
@@ -345,11 +345,11 @@ export default function ProjectTable({
 
         if (draftSetupState === 'hasFinishedDraft')
           return (
-            <div className="tw-flex tw-flex-row tw-gap-1">
+            <div className="tw:flex tw:flex-row tw:gap-1">
               {isDraftGenerating && <Spinner />}
               <Button
                 variant={isDraftGenerating ? 'secondary' : 'default'}
-                className="tw-text-sm"
+                className="tw:text-sm"
                 onClick={() =>
                   papi.commands.sendCommand(
                     'platformScriptureEditor.openResourceViewer',
@@ -377,7 +377,7 @@ export default function ProjectTable({
                         containers: {
                           'slingshot-ai-container': {
                             style: {
-                              border: 'dashed hsl(var(--muted-foreground))',
+                              border: 'dashed var(--muted-foreground)',
                             },
                           },
                         },
@@ -442,7 +442,7 @@ export default function ProjectTable({
               key={projectInfo.projectId}
               className={cn({
                 // Darkened row. Looks disabled
-                'tw-bg-muted/50 tw-text-muted-foreground':
+                'tw:bg-muted/50 tw:text-muted-foreground':
                   projectInfo.draftInfo.connectionState === 'cannotSetUp' ||
                   projectInfo.draftInfo.connectionState === 'cannotAccessDrafts',
               })}

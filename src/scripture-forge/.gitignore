@@ -31,4 +31,7 @@ dist-ssr
 temp-build
 assets/sf-pdp
 
+# Module lists and the build stamp, read by paranext-core's third-party notices generator
+.notices
+
 # #endregion
